@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <section id="payment">
+            <group id="swedbank_pay" translate="label" type="text"
+                   sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                <group id="payments" translate="label" type="text"
+                       sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Payments Configuration</label>
+                    <field id="active" translate="label" type="select"
+                           sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Enabled</label>
+                        <config_path>payment/swedbank_pay_payments/active</config_path>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    </field>
+
+                    <field id="available_instruments_hints" translate="label" sortOrder="20" type="label"
+                           showInDefault="1" showInWebsite="1" showInStore="0">
+                        <label>Available Instruments</label>
+                        <comment>
+                            <![CDATA[<span>Please go to the <b>store view scope</b> to select available instruments</span>]]>
+                        </comment>
+                        <depends>
+                            <field id='active'>1</field>
+                        </depends>
+                    </field>
+
+                    <field id="available_instruments" translate="label" sortOrder="30" showInDefault="0" showInWebsite="0" showInStore="1">
+                        <label>Available Instruments</label>
+                        <config_path>payment/swedbank_pay_payments/available_instruments</config_path>
+                        <frontend_model>SwedbankPay\Payments\Block\System\Config\AvailableInstruments</frontend_model>
+                        <backend_model>SwedbankPay\Payments\Model\Config\Backend\AvailableInstrumentsValidator</backend_model>
+                        <depends>
+                            <field id='active'>1</field>
+                        </depends>
+                    </field>
+                </group>
+            </group>
+        </section>
+    </system>
+</config>

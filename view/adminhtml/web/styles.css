@@ -1,0 +1,7 @@
+#row_payment_other_swedbank_pay_payments_available_instruments_hints label span[data-config-scope]:before {
+    display: none;
+}
+
+#row_payment_other_swedbank_pay_payments_available_instruments_hints .use-default {
+    display: none;
+}

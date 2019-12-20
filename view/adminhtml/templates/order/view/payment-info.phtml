@@ -1,0 +1,9 @@
+<?php
+/** @var \SwedbankPay\Payments\Block\Adminhtml\Order\View\PaymentInfo $this */
+?>
+
+<br />
+<p>
+    <strong>SwedbankPay Payment ID:</strong> <?php echo $this->getCurrentPaymentIdPath(); ?><br />
+    <strong>SwedbankPay Payment Instrument:</strong> <?php echo ucfirst($this->getCurrentPaymentInstrument()); ?>
+</p>

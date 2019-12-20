@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <event name="sales_order_place_after">
+        <observer name="AfterOrderPlaceObserver" instance="SwedbankPay\Payments\Observer\AfterOrderPlaceObserver" />
+    </event>
+    <event name="checkout_onepage_controller_success_action">
+        <observer name="AfterOrderSuccessObserver" instance="SwedbankPay\Payments\Observer\AfterOrderSuccessObserver" />
+    </event>
+    <event name="admin_system_config_changed_section_currency">
+        <observer name="AfterCurrencyChangedObserver" instance="SwedbankPay\Payments\Observer\AfterCurrencyChangedObserver" />
+    </event>
+</config>
