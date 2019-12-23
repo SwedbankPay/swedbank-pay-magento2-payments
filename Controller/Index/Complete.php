@@ -31,7 +31,7 @@ class Complete extends PaymentActionAbstract implements CsrfAwareActionInterface
     /**
      * @var SwedbankOrderRepository
      */
-    protected $swedbankOrderRepo;
+    protected $swedbankPayOrderRepo;
 
     /**
      * @var ServiceHelper
@@ -52,7 +52,7 @@ class Complete extends PaymentActionAbstract implements CsrfAwareActionInterface
      * @param Logger $logger
      * @param UrlInterface $urlInterface
      * @param CheckoutSession $checkoutSession
-     * @param SwedbankOrderRepository $swedbankOrderRepo
+     * @param SwedbankOrderRepository $swedbankPayOrderRepo
      * @param ServiceHelper $serviceHelper
      */
     public function __construct(
@@ -62,14 +62,14 @@ class Complete extends PaymentActionAbstract implements CsrfAwareActionInterface
         ConfigHelper $configHelper,
         Logger $logger,
         CheckoutSession $checkoutSession,
-        SwedbankOrderRepository $swedbankOrderRepo,
+        SwedbankOrderRepository $swedbankPayOrderRepo,
         ServiceHelper $serviceHelper,
         UrlInterface $urlInterface
     ) {
         parent::__construct($context, $resultJsonFactory, $eventManager, $configHelper, $logger);
 
         $this->checkoutSession = $checkoutSession;
-        $this->swedbankOrderRepo = $swedbankOrderRepo;
+        $this->swedbankPayOrderRepo = $swedbankPayOrderRepo;
         $this->serviceHelper = $serviceHelper;
         $this->urlInterface = $urlInterface;
 
@@ -88,9 +88,9 @@ class Complete extends PaymentActionAbstract implements CsrfAwareActionInterface
 
         $order = $this->checkoutSession->getLastRealOrder();
 
-        $swedbankOrder = $this->swedbankOrderRepo->getByOrderId($order->getEntityId());
+        $swedbankPayOrder = $this->swedbankPayOrderRepo->getByOrderId($order->getEntityId());
 
-        $paymentData = $this->serviceHelper->getPaymentData($swedbankOrder->getPaymentIdPath());
+        $paymentData = $this->serviceHelper->getPaymentData($swedbankPayOrder->getPaymentIdPath());
 
         switch ($paymentData->getState()) {
             case 'Failed':

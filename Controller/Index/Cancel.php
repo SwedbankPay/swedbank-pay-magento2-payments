@@ -32,12 +32,12 @@ class Cancel extends PaymentActionAbstract implements CsrfAwareActionInterface
     /**
      * @var SwedbankQuoteRepository
      */
-    protected $swedbankQuoteRepo;
+    protected $swedbankPayQuoteRepo;
 
     /**
      * @var SwedbankOrderRepository
      */
-    protected $swedbankOrderRepo;
+    protected $swedbankPayOrderRepo;
 
     /**
      * @var MageOrderRepository
@@ -58,8 +58,8 @@ class Cancel extends PaymentActionAbstract implements CsrfAwareActionInterface
      * @param Logger $logger
      * @param UrlInterface $urlInterface
      * @param CheckoutSession $checkoutSession
-     * @param SwedbankQuoteRepository $swedbankQuoteRepo
-     * @param SwedbankOrderRepository $swedbankOrderRepo
+     * @param SwedbankQuoteRepository $swedbankPayQuoteRepo
+     * @param SwedbankOrderRepository $swedbankPayOrderRepo
      * @param MageOrderRepository $mageOrderRepo
      *
      * @SuppressWarnings(PHPMD.ExcessiveParameterList)
@@ -72,16 +72,16 @@ class Cancel extends PaymentActionAbstract implements CsrfAwareActionInterface
         Logger $logger,
         UrlInterface $urlInterface,
         CheckoutSession $checkoutSession,
-        SwedbankQuoteRepository $swedbankQuoteRepo,
-        SwedbankOrderRepository $swedbankOrderRepo,
+        SwedbankQuoteRepository $swedbankPayQuoteRepo,
+        SwedbankOrderRepository $swedbankPayOrderRepo,
         MageOrderRepository $mageOrderRepo
     ) {
         parent::__construct($context, $resultJsonFactory, $eventManager, $configHelper, $logger);
 
         $this->urlInterface = $urlInterface;
         $this->checkoutSession = $checkoutSession;
-        $this->swedbankQuoteRepo = $swedbankQuoteRepo;
-        $this->swedbankOrderRepo = $swedbankOrderRepo;
+        $this->swedbankPayQuoteRepo = $swedbankPayQuoteRepo;
+        $this->swedbankPayOrderRepo = $swedbankPayOrderRepo;
         $this->mageOrderRepo = $mageOrderRepo;
 
         $this->setEventName('cancel');
@@ -103,10 +103,10 @@ class Cancel extends PaymentActionAbstract implements CsrfAwareActionInterface
 
         $this->logger->debug(sprintf('Quote ID %s is restored', $quote->getEntityId()));
 
-        $swedbankQuote = $this->swedbankQuoteRepo->getByQuoteId($quote->getEntityId());
-        $swedbankOrder = $this->swedbankOrderRepo->getByPaymentId($swedbankQuote->getPaymentId());
+        $swedbankPayQuote = $this->swedbankPayQuoteRepo->getByQuoteId($quote->getEntityId());
+        $swedbankPayOrder = $this->swedbankPayOrderRepo->getByPaymentId($swedbankPayQuote->getPaymentId());
 
-        $order = $this->mageOrderRepo->get($swedbankOrder->getOrderId());
+        $order = $this->mageOrderRepo->get($swedbankPayOrder->getOrderId());
 
         $order->setState(Order::STATE_CANCELED);
         $order->setStatus(Order::STATE_CANCELED);

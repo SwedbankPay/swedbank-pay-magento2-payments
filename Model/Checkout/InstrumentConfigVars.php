@@ -25,6 +25,7 @@ class InstrumentConfigVars implements ConfigProviderInterface
 
     /**
      * @return array
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     public function getConfig()
     {
