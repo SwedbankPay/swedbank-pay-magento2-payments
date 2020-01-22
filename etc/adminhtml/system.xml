@@ -14,7 +14,14 @@
                         <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     </field>
 
-                    <field id="available_instruments_hints" translate="label" sortOrder="20" type="label"
+                    <field id="view" translate="label" sortOrder="20" type="select"
+                           showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Choose View</label>
+                        <config_path>payment/swedbank_pay_payments/view_type</config_path>
+                        <source_model>SwedbankPay\Payments\Model\Config\Source\ViewTypeSelector</source_model>
+                    </field>
+
+                    <field id="available_instruments_hints" translate="label" sortOrder="30" type="label"
                            showInDefault="1" showInWebsite="1" showInStore="0">
                         <label>Available Instruments</label>
                         <comment>
@@ -25,7 +32,7 @@
                         </depends>
                     </field>
 
-                    <field id="available_instruments" translate="label" sortOrder="30" showInDefault="0" showInWebsite="0" showInStore="1">
+                    <field id="available_instruments" translate="label" sortOrder="40" showInDefault="0" showInWebsite="0" showInStore="1">
                         <label>Available Instruments</label>
                         <config_path>payment/swedbank_pay_payments/available_instruments</config_path>
                         <frontend_model>SwedbankPay\Payments\Block\System\Config\AvailableInstruments</frontend_model>

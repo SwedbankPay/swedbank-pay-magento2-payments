@@ -6,8 +6,12 @@ use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Sales\Model\Order;
 use PayEx\Api\Client\Exception as ClientException;
 use PayEx\Api\Service\Data\ResponseInterface as ResponseServiceInterface;
+use PayEx\Api\Service\Payment\Transaction\Resource\Collection\Item\TransactionListItem;
+use PayEx\Api\Service\Payment\Transaction\Resource\Collection\TransactionListCollection;
 use PayEx\Api\Service\Payment\Transaction\Resource\Response\Data\TransactionInterface;
+use PayEx\Api\Service\Payment\Transaction\Resource\Response\Data\TransactionsInterface;
 use PayEx\Api\Service\Payment\Transaction\Resource\Response\Data\TransactionObjectInterface;
+use PayEx\Api\Service\Payment\Transaction\Resource\Response\Data\TransactionsObjectInterface;
 use PayEx\Api\Service\Paymentorder\Request\GetCurrentPayment;
 use PayEx\Api\Service\Paymentorder\Resource\Response\Data\GetCurrentPaymentInterface;
 use PayEx\Api\Service\Request;
@@ -218,6 +222,7 @@ class Service
 
         $paymentData->setIntent($currentPayment->getPayment()->getIntent());
         $paymentData->setState($currentPayment->getPayment()->getState());
+        $paymentData->setAmount($currentPayment->getPayment()->getAmount());
         $this->paymentDataHelper->update($paymentData);
 
         return $paymentData;
@@ -239,7 +244,7 @@ class Service
          * $transactionParams[1] Payment Instrument
          * $transactionParams[2] Payment Resource ID
          * $transactionParams[3] Transaction Type
-         * $transactionParams[3] Transaction ID
+         * $transactionParams[4] Transaction ID
          */
         $validUri = preg_match('|/psp/([^/]+)/payments/([^/]+)/([^/]+)/([^/]+)|', $transactionUri, $transactionParams);
         if (!$validUri) {
@@ -256,9 +261,74 @@ class Service
         $serviceRequest->setRequestEndpoint($transactionUri);
 
         /** @var TransactionObjectInterface $transactionObject */
-        $transactionObject = $serviceRequest->send()->getResponseResource();
+        $transactionResponse = $serviceRequest->send();
+        $transactionObject = $transactionResponse->getResponseResource();
+
+        $this->logger->debug(
+            sprintf(
+                'Current Transaction Response: \'%s\'',
+                json_encode($transactionResponse->getResponseData())
+            )
+        );
 
         return $transactionObject->getTransaction();
+    }
+
+    /**
+     * @param string $transactionUri
+     * @return TransactionInterface|false
+     * @throws ClientException
+     * @throws ServiceException
+     *
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     * @SuppressWarnings(PHPMD.UnusedLocalVariable)
+     */
+    public function getLastTransactionData($transactionUri)
+    {
+        /**
+         * $transactionParams[0] Transaction URI
+         * $transactionParams[1] Payment Instrument
+         * $transactionParams[2] Payment Resource ID
+         * $transactionParams[3] Transaction Type
+         */
+        $validUri = preg_match('|/psp/([^/]+)/payments/([^/]+)/([^/]+)|', $transactionUri, $transactionParams);
+        if (!$validUri) {
+            return false;
+        }
+
+        /** @noinspection PhpUnusedLocalVariableInspection */
+        list($transactionUri, $instrument, $resourceId, $transactionType) = $transactionParams;
+
+        $instrument = $this->getInstrument($instrument);
+
+        /** @var Request $serviceRequest */
+        $serviceRequest = $this->requestService->init(ucfirst($instrument) . '/Transaction', 'GetTransactions');
+        $serviceRequest->setRequestEndpoint($transactionUri);
+
+        /** @var TransactionsObjectInterface $transactionsObject */
+        $transactionResponse = $serviceRequest->send();
+
+        $transactionsObject = $transactionResponse->getResponseResource();
+
+        /** @var TransactionsInterface $transactions */
+        $transactions = $transactionsObject->getTransactions();
+
+        /** @var TransactionListCollection $transactionList */
+        $transactionList = $transactions->getTransactionList();
+
+        /** @var TransactionListItem $lastTransaction */
+        $lastTransaction = null;
+
+        /** @var TransactionListItem $transaction */
+        foreach ($transactionList->getItems() as $transaction) {
+            if (!$lastTransaction) {
+                $lastTransaction = $transaction;
+            } elseif (strtotime($lastTransaction->getCreated()) < strtotime($transaction->getCreated())) {
+                $lastTransaction = $transaction;
+            }
+        }
+
+        return $lastTransaction;
     }
 
     /**

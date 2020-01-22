@@ -56,7 +56,8 @@ class InstrumentCollector
         return array_values(array_map(function (InstrumentInterface $instrument) {
             return array(
                 'name' => $instrument->getInstrumentName(),
-                'pretty_name' => $instrument->getInstrumentPrettyName()
+                'pretty_name' => $instrument->getInstrumentPrettyName(),
+                'js_object_name' => $instrument->getJsObjectName()
             );
         }, $this->getInstruments()));
     }

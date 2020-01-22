@@ -23,12 +23,22 @@ interface InstrumentInterface
     /**
      * @return string|null
      */
+    public function getJsObjectName();
+
+    /**
+     * @return string|null
+     */
     public function getPaymentOperation();
 
     /**
      * @return string|null
      */
-    public function getPaymentIntent();
+    public function getHostedUriRel();
+
+    /**
+     * @return string|null
+     */
+    public function getRedirectUriRel();
 
     /**
      * @return RequestResource

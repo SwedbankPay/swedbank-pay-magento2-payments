@@ -9,6 +9,7 @@
                 <allowspecific>0</allowspecific>
                 <group>swedbank_pay</group>
                 <order_status>swedbank_pay_pending</order_status>
+                <view_type>redirect_view</view_type>
                 <!-- Begin variables for virtual type -->
                 <can_order>0</can_order>
                 <can_authorize>1</can_authorize>

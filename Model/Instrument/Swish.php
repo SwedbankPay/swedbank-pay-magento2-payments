@@ -13,7 +13,8 @@ class Swish extends AbstractInstrument
 {
     protected $instrument = 'swish';
     protected $paymentOperation = 'Purchase';
-    protected $paymentIntent = 'Sale';
+    protected $hostedUriRel = 'view-payment';
+    protected $redirectUriRel = 'redirect-sale';
     protected $allowedCurrencies = 'SEK';
 
     /**

@@ -30,6 +30,7 @@ use SwedbankPay\Payments\Model\ResourceModel\OrderRepository;
 /**
  * Class Callback
  *
+ * @SuppressWarnings(PHPMD.CyclomaticComplexity)
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class Callback extends PaymentActionAbstract implements CsrfAwareActionInterface
@@ -159,6 +160,13 @@ class Callback extends PaymentActionAbstract implements CsrfAwareActionInterface
             );
         }
 
+        if (!$paymentData->getOrderId()) {
+            return $this->createResult(
+                'success',
+                'Order does not exist with payment ID'
+            );
+        }
+
         /** @var $order MagentoOrder */
         $order = $this->magentoOrderRepo->get($paymentData->getOrderId());
 
@@ -167,7 +175,8 @@ class Callback extends PaymentActionAbstract implements CsrfAwareActionInterface
 
         $this->logger->debug(
             sprintf(
-                'Transaction state in Callback controller: \'%s\'',
+                'Transaction in Callback controller, type: \'%s\' & state: \'%s\'',
+                $transactionData->getType(),
                 $transactionData->getState()
             )
         );
@@ -229,6 +238,11 @@ class Callback extends PaymentActionAbstract implements CsrfAwareActionInterface
                 $this->orderHelper->setStatus($order, OrderHelper::STATUS_PENDING);
                 break;
             case 'Completed':
+                if ($order->getState() == MagentoOrder::STATE_CANCELED &&
+                    $transactionData->getType() == 'Cancellation') {
+                    break;
+                }
+
                 if ($order->getState() == MagentoOrder::STATE_PENDING_PAYMENT ||
                     $order->getState() == MagentoOrder::STATE_PAYMENT_REVIEW ||
                     $order->getState() == MagentoOrder::STATE_CANCELED) {

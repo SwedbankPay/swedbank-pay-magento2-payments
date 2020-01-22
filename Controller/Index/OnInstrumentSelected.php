@@ -9,6 +9,7 @@ use Magento\Framework\Controller\Result\Json;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Controller\ResultInterface;
 use Magento\Framework\Event\Manager as EventManager;
+use Magento\Store\Model\StoreManagerInterface;
 use PayEx\Api\Client\Exception;
 use SwedbankPay\Core\Exception\ServiceException;
 use SwedbankPay\Core\Logger\Logger;
@@ -45,6 +46,11 @@ class OnInstrumentSelected extends PaymentActionAbstract
     protected $instrumentFactory;
 
     /**
+     * @var StoreManagerInterface
+     */
+    protected $storeManager;
+
+    /**
      * OnInstrumentSelected constructor.
      * @param Context $context
      * @param JsonFactory $resultJsonFactory
@@ -55,6 +61,9 @@ class OnInstrumentSelected extends PaymentActionAbstract
      * @param ServiceHelper $serviceHelper
      * @param PaymentDataHelper $paymentDataHelper
      * @param InstrumentFactory $instrumentFactory
+     * @param StoreManagerInterface $storeManager
+     *
+     * @SuppressWarnings(PHPMD.ExcessiveParameterList)
      */
     public function __construct(
         Context $context,
@@ -65,7 +74,8 @@ class OnInstrumentSelected extends PaymentActionAbstract
         HttpRequest $httpRequest,
         ServiceHelper $serviceHelper,
         PaymentDataHelper $paymentDataHelper,
-        InstrumentFactory $instrumentFactory
+        InstrumentFactory $instrumentFactory,
+        StoreManagerInterface $storeManager
     ) {
         parent::__construct($context, $resultJsonFactory, $eventManager, $configHelper, $logger);
 
@@ -73,6 +83,7 @@ class OnInstrumentSelected extends PaymentActionAbstract
         $this->serviceHelper = $serviceHelper;
         $this->paymentDataHelper = $paymentDataHelper;
         $this->instrumentFactory = $instrumentFactory;
+        $this->storeManager = $storeManager;
     }
 
 
@@ -80,6 +91,7 @@ class OnInstrumentSelected extends PaymentActionAbstract
      * @return Json|ResultInterface|ResponseInterface
      * @throws Exception
      * @throws ServiceException
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     public function execute()
     {
@@ -105,13 +117,30 @@ class OnInstrumentSelected extends PaymentActionAbstract
 
         $this->paymentDataHelper->saveQuoteToDB($responseService->getResponseData(), $instrument);
 
-        $redirectUrl = $responseService->getOperationByRel(
-            'redirect-' . strtolower($paymentInstrument->getPaymentIntent()),
+        $store = $this->storeManager->getStore();
+
+        $viewType = $this->configHelper->getViewType($store);
+
+        if ($viewType === 'hosted_view') {
+            $url = $responseService->getOperationByRel(
+                $paymentInstrument->getHostedUriRel(),
+                'href'
+            );
+
+            if ($url) {
+                return $this->setResponse('hosted_url', $url);
+            }
+
+            return $this->setResult('Hosted URL not found', 400);
+        }
+
+        $url = $responseService->getOperationByRel(
+            $paymentInstrument->getRedirectUriRel(),
             'href'
         );
 
-        if ($redirectUrl) {
-            return $this->setResponse('redirect_url', $redirectUrl);
+        if ($url) {
+            return $this->setResponse('redirect_url', $url);
         }
 
         return $this->setResult('Redirect URL not found', 400);

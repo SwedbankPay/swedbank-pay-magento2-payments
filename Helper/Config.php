@@ -22,7 +22,18 @@ class Config extends CoreConfig
      */
     public function getProcessedOrderStatus($store = null)
     {
-        return $this->getPaymentValue('order_status', ConfigProvider::CODE, $store);
+        return $this->getPaymentValue('order_status', $this->getPaymentMethodCode(), $store);
+    }
+
+    /**
+     * Get the view type ex: 'hosted_view' or 'redirect_view'
+     *
+     * @param int|string|null $store
+     * @return string
+     */
+    public function getViewType($store = null)
+    {
+        return $this->getPaymentValue('view_type', $this->getPaymentMethodCode(), $store);
     }
 
     /**

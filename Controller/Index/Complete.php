@@ -10,6 +10,7 @@ use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Event\Manager as EventManager;
 use Magento\Framework\UrlInterface;
+use Magento\Sales\Model\Order;
 use SwedbankPay\Core\Exception\ServiceException;
 use SwedbankPay\Core\Logger\Logger;
 use SwedbankPay\Payments\Api\OrderRepositoryInterface as SwedbankOrderRepository;
@@ -88,21 +89,43 @@ class Complete extends PaymentActionAbstract implements CsrfAwareActionInterface
 
         $order = $this->checkoutSession->getLastRealOrder();
 
+        if (!$order->getEntityId()) {
+            $url = $this->urlInterface->getUrl('checkout/cart');
+            $this->setRedirect($url);
+
+            return;
+        }
+
         $swedbankPayOrder = $this->swedbankPayOrderRepo->getByOrderId($order->getEntityId());
 
         $paymentData = $this->serviceHelper->getPaymentData($swedbankPayOrder->getPaymentIdPath());
 
         switch ($paymentData->getState()) {
             case 'Failed':
-                $this->logger->debug('Cancelling the Order # ' . $order->getEntityId());
-
-                $url = $this->urlInterface->getUrl('SwedbankPayPayments/Index/Cancel');
-                $this->setRedirect($url);
+                $this->cancelOrder($order);
                 break;
             default:
+                $lastTransactionData = $this->serviceHelper->getLastTransactionData(
+                    $swedbankPayOrder->getPaymentIdPath() . '/transactions'
+                );
+
+                if ($lastTransactionData->getState() != 'Completed') {
+                    $this->logger->debug(
+                        sprintf(
+                            'Order ID %s has Payment State \'%s\' but Transaction State \'%s\'',
+                            $order->getEntityId(),
+                            $paymentData->getState(),
+                            $lastTransactionData->getState()
+                        )
+                    );
+
+                    $this->cancelOrder($order);
+                    return;
+                }
+
                 $this->logger->debug(
                     sprintf(
-                        'Order ID %s has Transaction State \'%s\'',
+                        'Order ID %s has Payment State \'%s\'',
                         $order->getEntityId(),
                         $paymentData->getState()
                     )
@@ -114,6 +137,16 @@ class Complete extends PaymentActionAbstract implements CsrfAwareActionInterface
         }
     }
 
+    /**
+     * @param Order $order
+     */
+    protected function cancelOrder($order)
+    {
+        $this->logger->debug('Cancelling the Order # ' . $order->getEntityId());
+
+        $url = $this->urlInterface->getUrl('SwedbankPayPayments/Index/Cancel');
+        $this->setRedirect($url);
+    }
 
     /**
      * Create exception in case CSRF validation failed.

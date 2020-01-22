@@ -16,8 +16,10 @@ class Creditcard extends AbstractInstrument
 {
     protected $instrument = 'creditcard';
     protected $instrumentPrettyName = 'Credit Card';
+    protected $jsObjectName = 'creditCard';
     protected $paymentOperation = 'Purchase';
-    protected $paymentIntent = 'Authorization';
+    protected $hostedUriRel = 'view-authorization';
+    protected $redirectUriRel = 'redirect-authorization';
 
     /**
      * @return RequestResource

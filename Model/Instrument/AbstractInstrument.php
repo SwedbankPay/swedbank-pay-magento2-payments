@@ -27,6 +27,7 @@ use SwedbankPay\Payments\Model\Instrument\Data\InstrumentInterface;
  * Class AbstractInstrument
  *
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
+ * @SuppressWarnings(PHPMD.TooManyFields)
  */
 abstract class AbstractInstrument implements InstrumentInterface
 {
@@ -43,12 +44,22 @@ abstract class AbstractInstrument implements InstrumentInterface
     /**
      * @var string
      */
+    protected $jsObjectName;
+
+    /**
+     * @var string
+     */
     protected $paymentOperation = 'Purchase';
 
     /**
      * @var string
      */
-    protected $paymentIntent = 'Authorization';
+    protected $hostedUriRel = 'view-authorization';
+
+    /**
+     * @var string
+     */
+    protected $redirectUriRel = 'redirect-authorization';
 
     /**
      * @var string|null
@@ -165,6 +176,18 @@ abstract class AbstractInstrument implements InstrumentInterface
     /**
      * @return string|null
      */
+    public function getJsObjectName()
+    {
+        if ($this->jsObjectName) {
+            return $this->jsObjectName;
+        }
+
+        return $this->getInstrumentName();
+    }
+
+    /**
+     * @return string|null
+     */
     public function getPaymentOperation()
     {
         return $this->paymentOperation;
@@ -173,9 +196,17 @@ abstract class AbstractInstrument implements InstrumentInterface
     /**
      * @return string|null
      */
-    public function getPaymentIntent()
+    public function getHostedUriRel()
     {
-        return $this->paymentIntent;
+        return $this->hostedUriRel;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getRedirectUriRel()
+    {
+        return $this->redirectUriRel;
     }
 
     /**
@@ -235,9 +266,13 @@ abstract class AbstractInstrument implements InstrumentInterface
         $mageCancelUrl = $this->urlInterface->getUrl('SwedbankPayPayments/Index/Cancel');
         $mageCallbackUrl = $this->urlInterface->getUrl('SwedbankPayPayments/Index/Callback');
 
+        $hostUrls = [];
+        $hostUrls[] = $this->urlInterface->getUrl('checkout');
+
         $urlData = $this->subresourceFactory->create($this->instrument, 'PaymentUrl');
         $urlData->setCompleteUrl($mageCompleteUrl)
             ->setCancelUrl($mageCancelUrl)
+            ->setHostUrls($hostUrls)
             ->setCallbackUrl($mageCallbackUrl);
 
         if ($logoSrcUrl = $this->headerLogo->getLogoSrc()) {

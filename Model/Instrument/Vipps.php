@@ -15,7 +15,8 @@ class Vipps extends AbstractInstrument
 {
     protected $instrument = 'vipps';
     protected $paymentOperation = 'Purchase';
-    protected $paymentIntent = 'Authorization';
+    protected $hostedUriRel = 'view-authorization';
+    protected $redirectUriRel = 'redirect-authorization';
     protected $allowedCurrencies = 'NOK';
 
     /**

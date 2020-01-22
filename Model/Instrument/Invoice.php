@@ -42,7 +42,8 @@ class Invoice extends AbstractInstrument
 {
     protected $instrument = 'invoice';
     protected $paymentOperation = 'CreateInvoice';
-    protected $paymentIntent = 'Authorization';
+    protected $hostedUriRel = 'view-authorization';
+    protected $redirectUriRel = 'redirect-authorization';
     protected $allowedCurrencies = 'SEK,NOK,EUR';
 
     /**

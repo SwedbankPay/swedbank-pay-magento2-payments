@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <layout xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/layout_generic.xsd">
     <container name="root">
-        <block class="SwedbankPay\Payments\Block\Redirect\Redirect" name="swedbank-pay-redirect-form" template="payment/redirect.phtml" cacheable="false"/>
+        <block class="SwedbankPay\Payments\Block\Redirect\Redirect" name="swedbank-pay-redirect-form" template="payment/redirect-view.phtml" cacheable="false"/>
     </container>
 </layout>

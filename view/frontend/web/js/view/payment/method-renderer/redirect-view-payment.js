@@ -45,7 +45,7 @@ define([
 
     return Component.extend({
         defaults: {
-            template: 'SwedbankPay_Payments/payment/redirect'
+            template: 'SwedbankPay_Payments/payment/redirect-view'
         },
         config: {
             data: {
@@ -67,69 +67,15 @@ define([
             Object.assign(this.config.data, window.checkoutConfig.SwedbankPay_Payments);
             Object.assign(this.config.data, window.checkoutConfig.SwedbankPay_Payments_Instrument_List);
 
-            quote.totals.subscribe(function(totals){
-                if(self.totals.grand_total !== totals.grand_total){
-                    if(self.getCode() == self.isChecked()) {
-                        self.updatePaymentScript();
-                    }
-                }
-
-                self.totals = totals;
-            });
-        },
-        clearPaymentScript: function(){
-            if (typeof payex.hostedView.page !== "undefined") {
-                payex.hostedView.page().close();
-            }
-
-            $('#instrumentScript').remove();
-            $('#swedbank-pay-payments').empty();
-        },
-        renderPaymentScript: function(scriptSrc){
-            var self = this;
-            var script = document.createElement('script');
-
-            script.type = "text/javascript";
-            script.id = "paymentMenuScript";
-
-            $('.checkout-index-index').append(script);
-
-            script.onload = function(){
-                if(self.instrumentScript == scriptSrc) {
-                    self.swedbankPaySetupHostedView();
-                }
-            };
-
-            script.src = scriptSrc;
-        },
-        swedbankPaySetupHostedView: function() {
-            payex.hostedView.page({
-                container: 'swedbank-pay-payments',
-                //culture: this.config.culture,
-                style: paymentInstrumentStyling
-            }).open();
-        },
-        updatePaymentScript: function(){
-            let self = this;
-
-            fullscreenLoader.startLoader();
-
-            storage.get(
-                self.config.data.onUpdated,
-                "",
-                true
-            ).done(function(response){
-                if(self.instrumentScript != response.result) {
-                    self.clearPaymentScript();
-                    self.renderPaymentScript(response.result);
-
-                    self.instrumentScript = response.result;
-                    fullscreenLoader.stopLoader();
-                }
-            }).fail(function(message){
-                console.error(message);
-                fullscreenLoader.stopLoader();
-            });
+            // quote.totals.subscribe(function(totals) {
+            //     if(self.totals.grand_total !== totals.grand_total) {
+            //         if(self.getCode() == self.isChecked()) {
+            //             self.updatePaymentScript();
+            //         }
+            //     }
+            //
+            //     self.totals = totals;
+            // });
         },
         getAvailableInstruments: function () {
             let self = this;
