@@ -2,6 +2,13 @@
 
 ![Swedbank Pay Magento 2 Payments][opengraph-image]
 
+## About
+
+**IMPORTANT**: This extension is at an early stage and not yet used in production.
+We do not offer support for this version, but will release supported versions
+in the future. Feel free to play around, but for full functionality and support,
+please wait for the supported, stable release.
+
 The Swedbank Pay Payments module for Magento 2 integrates the all the payment methods provided by Swedbank Pay into Magento 2 for enabling interaction with the Swedbank Pay eCommerce API.
 
 ## Requirements
