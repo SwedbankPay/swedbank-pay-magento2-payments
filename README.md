@@ -1,4 +1,6 @@
-# Swedbank Pay Payments for Magento 2
+# Swedbank Pay Magento 2 Payments
+
+![Swedbank Pay Magento 2 Payments][opengraph-image]
 
 The Swedbank Pay Payments module for Magento 2 integrates the all the payment methods provided by Swedbank Pay into Magento 2 for enabling interaction with the Swedbank Pay eCommerce API.
 
@@ -7,20 +9,18 @@ The Swedbank Pay Payments module for Magento 2 integrates the all the payment me
 * Magento Open Source/Commerce version 2.2 or newer
 
 **Please Note:** When your  Merchant Account is created, there are a few things you need to attend to before you can
-start using it. The steps involved are described on the following page:
-https://developer.payex.com/xwiki/wiki/developer/view/Main/ecommerce/resources/admin/
+start using it.
 
 ## Installation 
 
-Swedbank Pay Payments for Magento 2 may be installed via Magento Marketplace or Composer.
+Swedbank Pay Magento 2 Payments may be installed via Magento Marketplace or Composer.
 
 ### Magento Marketplace
 
-If you have linked your Marketplace account to your Magento 2 store, you may install the Swedbank Pay Payments for Magento 2 
+If you have linked your Marketplace account to your Magento 2 store, you may install the Swedbank Pay Magento 2 Payments 
 with the Magento Component Manager.
 
-For installation using the Component Manager, please see the official guide here:
-http://docs.magento.com/marketplace/user_guide/quick-tour/install-extension.html
+For installation using the Component Manager, please see [the official guide][component-manager].
 
 ### Composer
 
@@ -90,12 +90,13 @@ with configurable options as follows:
 ## Support
 
 To find the customer service available in your country, please visit
-[the Swedbank Pay website][support].
-
-## Release Notes
-
-* **1.0.0**: December 2019 - First official release
+[the Swedbank Pay website][swedbank-pay].
 
 ## License
 
-Swedbank Pay Payments for Magento 2 is released under [Apache V2.0 licence][license].
+Swedbank Pay Magento 2 Payments is released under [Apache V2.0 licence][license].
+
+[opengraph-image]: https://repository-images.githubusercontent.com/211832427/a3dde300-53e7-11ea-9c04-7a2cacb27ad2
+[component-manager]: http://docs.magento.com/marketplace/user_guide/quick-tour/install-extension.html
+[license]: LICENSE
+[swedbank-pay]: https://swedbankpay.com/
