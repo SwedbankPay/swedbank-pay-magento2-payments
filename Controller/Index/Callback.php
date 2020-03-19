@@ -18,6 +18,7 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Order as MagentoOrder;
+use SwedbankPay\Api\Response;
 use SwedbankPay\Api\Service\Payment\Transaction\Resource\Response\Data\TransactionInterface;
 use SwedbankPay\Core\Helper\Order as OrderHelper;
 use SwedbankPay\Core\Logger\Logger;
@@ -114,23 +115,26 @@ class Callback extends PaymentActionAbstract implements CsrfAwareActionInterface
      */
     public function updatePaymentData()
     {
+        $callbackContent = $this->requestContent->getContent();
+
         $this->logger->debug(
             sprintf(
                 "Callback controller is called with request: \n %s",
-                $this->requestContent->getContent()
+                $callbackContent
             )
         );
 
-        $requestData = json_decode($this->requestContent->getContent(), true);
-
-        if (json_last_error() !== JSON_ERROR_NONE) {
+        try {
+            $response = new Response($callbackContent);
+        } catch (\SwedbankPay\Api\Client\Exception $e) {
             return $this->createResult(
                 'error',
-                'Failed to JSON decode callback request data',
-                json_last_error() . "\nRequest Data:\n" . $this->requestContent->getContent()
+                $e->getMessage(),
+                "Request Data:\n" . $callbackContent
             );
         }
 
+        $requestData = $response->toArray();
         $paymentData = null;
         $transactionData = null;
 
@@ -156,7 +160,7 @@ class Callback extends PaymentActionAbstract implements CsrfAwareActionInterface
             return $this->createResult(
                 'error',
                 'Failed to retrieve transaction data',
-                "Request Data:\n" . $this->requestContent->getContent()
+                "Request Data:\n" . $callbackContent
             );
         }
 
