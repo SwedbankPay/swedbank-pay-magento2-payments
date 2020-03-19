@@ -101,7 +101,7 @@ class PaymentData
      *
      * @param string $paymentId
      *
-     * @return PaymentOrderInterface|PaymentQuoteInterface|false
+     * @return PaymentOrderInterface|PaymentQuoteInterface
      * @throws NoSuchEntityException
      * @SuppressWarnings(PHPMD.EmptyCatchBlock)
      */
@@ -128,6 +128,51 @@ class PaymentData
         }
 
         $errorMessage = sprintf("Unable to find a SwedbankPay payment matching Payment ID:\n%s", $paymentId);
+
+        $this->logger->error(
+            $errorMessage
+        );
+
+        throw new NoSuchEntityException(
+            new Phrase($errorMessage)
+        );
+    }
+
+    /**
+     * Get SwedbankPay payment data by payment id path
+     *
+     * @param string $paymentIdPath
+     *
+     * @return PaymentOrderInterface|PaymentQuoteInterface
+     * @throws NoSuchEntityException
+     * @SuppressWarnings(PHPMD.EmptyCatchBlock)
+     */
+    public function getByPaymentIdPath($paymentIdPath)
+    {
+        $paymentData = null;
+
+        try {
+            $paymentData = $this->paymentOrderRepo->getByPaymentIdPath($paymentIdPath);
+        } catch (NoSuchEntityException $e) {
+        }
+
+        if ($paymentData instanceof PaymentOrderInterface) {
+            return $paymentData;
+        }
+
+        try {
+            $paymentData = $this->paymentQuoteRepo->getByPaymentIdPath($paymentIdPath);
+        } catch (NoSuchEntityException $e) {
+        }
+
+        if ($paymentData instanceof PaymentQuoteInterface) {
+            return $paymentData;
+        }
+
+        $errorMessage = sprintf(
+            "Unable to find a SwedbankPay payment matching Payment ID Path:\n%s",
+            $paymentIdPath
+        );
 
         $this->logger->error(
             $errorMessage

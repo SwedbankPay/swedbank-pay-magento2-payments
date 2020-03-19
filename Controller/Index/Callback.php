@@ -135,26 +135,33 @@ class Callback extends PaymentActionAbstract implements CsrfAwareActionInterface
         }
 
         $requestData = $response->toArray();
-        $paymentData = null;
-        $transactionData = null;
 
-        foreach ($requestData as $requestKey => $requestValue) {
-            switch ($requestKey) {
-                case 'payment':
-                    $paymentData = $this->serviceHelper->getPaymentData($requestValue['id']);
-                    break;
-                case 'transaction':
-                    // Replaces specific transactions with generic 'transactions'
-                    $transactionUri = preg_replace(
-                        '|/psp/([^/]+)/payments/([^/]+)/([^/]+)/([^/]+)|',
-                        '/psp/$1/payments/$2/transactions/$4',
-                        $requestValue['id']
-                    );
+        $paymentId = $requestData['payment']['id'];
+        $transactionId = $requestData['transaction']['id'];
 
-                    $transactionData = $this->serviceHelper->getTransactionData($transactionUri);
-                    break;
-            }
-        }
+        $paymentData = $this->serviceHelper->getPaymentData($paymentId);
+        $transactionData = $this->serviceHelper->getTransactionData($transactionId, $paymentId);
+
+//        $paymentData = null;
+//        $transactionData = null;
+//
+//        foreach ($requestData as $requestKey => $requestValue) {
+//            switch ($requestKey) {
+//                case 'payment':
+//                    $paymentData = $this->serviceHelper->getPaymentData($requestValue['id']);
+//                    break;
+//                case 'transaction':
+//                    // Replaces specific transactions with generic 'transactions'
+////                    $transactionUri = preg_replace(
+////                        '|/psp/([^/]+)/payments/([^/]+)/([^/]+)/([^/]+)|',
+////                        '/psp/$1/payments/$2/transactions/$4',
+////                        $requestValue['id']
+////                    );
+//
+//                    $transactionData = $this->serviceHelper->getTransactionData($requestValue['id'], $paymentData);
+//                    break;
+//            }
+//        }
 
         if (!($transactionData instanceof TransactionInterface)) {
             return $this->createResult(

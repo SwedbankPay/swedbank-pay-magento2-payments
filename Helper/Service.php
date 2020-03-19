@@ -230,14 +230,15 @@ class Service
 
     /**
      * @param string $transactionUri
+     * @param string $paymentUri
      * @return TransactionInterface|false
      * @throws ClientException
+     * @throws NoSuchEntityException
      * @throws ServiceException
-     *
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      * @SuppressWarnings(PHPMD.UnusedLocalVariable)
      */
-    public function getTransactionData($transactionUri)
+    public function getTransactionData($transactionUri, $paymentUri)
     {
         /**
          * $transactionParams[0] Transaction URI
@@ -252,13 +253,14 @@ class Service
         }
 
         /** @noinspection PhpUnusedLocalVariableInspection */
-        list($transactionUri, $instrument, $resourceId, $transactionType, $transactionId) = $transactionParams;
+        list($transactionUri, $instrument, $paymentId, $transactionType, $transactionId) = $transactionParams;
+        $paymentData = $this->paymentDataHelper->getByPaymentIdPath($paymentUri);
 
-        $instrument = $this->getInstrument($instrument);
+        $instrument = $this->getInstrument($paymentData->getInstrument());
 
         /** @var Request $serviceRequest */
         $serviceRequest = $this->requestService->init(ucfirst($instrument) . '/Transaction', 'GetTransaction');
-        $serviceRequest->setRequestEndpoint($transactionUri);
+        $serviceRequest->setRequestEndpointVars($paymentId, $transactionId);
 
         /** @var TransactionObjectInterface $transactionObject */
         $transactionResponse = $serviceRequest->send();
