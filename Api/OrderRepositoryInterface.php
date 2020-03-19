@@ -30,6 +30,13 @@ interface OrderRepositoryInterface
     public function getByPaymentId($paymentOrderId);
 
     /**
+     * @param string $paymentIdPath
+     * @return OrderInterface
+     * @throws NoSuchEntityException
+     */
+    public function getByPaymentIdPath($paymentIdPath);
+
+    /**
      * @param OrderInterface $order
      * @return OrderInterface
      */

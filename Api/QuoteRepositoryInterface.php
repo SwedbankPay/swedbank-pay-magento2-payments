@@ -30,6 +30,13 @@ interface QuoteRepositoryInterface
     public function getByPaymentId($paymentOrderId);
 
     /**
+     * @param string $paymentIdPath
+     * @return QuoteInterface
+     * @throws NoSuchEntityException
+     */
+    public function getByPaymentIdPath($paymentIdPath);
+
+    /**
      * @param QuoteInterface $quote
      * @return QuoteInterface
      */

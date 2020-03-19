@@ -117,6 +117,24 @@ class QuoteRepository implements QuoteRepositoryInterface
     }
 
     /**
+     * @param string $paymentIdPath
+     * @return QuoteInterface
+     * @throws NoSuchEntityException
+     */
+    public function getByPaymentIdPath($paymentIdPath)
+    {
+        /** @var QuoteModel $quote */
+        $quote = $this->quoteFactory->create();
+        $this->quoteResource->load($quote, $paymentIdPath, 'payment_id_path');
+        if (!$quote->getId()) {
+            throw new NoSuchEntityException(
+                __("The Quote that was requested doesn't exist. Verify the Payment ID Path and try again.")
+            );
+        }
+        return $quote;
+    }
+
+    /**
      * @param QuoteInterface $quote
      * @return QuoteInterface
      * @throws \Exception

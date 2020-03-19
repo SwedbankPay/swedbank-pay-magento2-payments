@@ -128,6 +128,24 @@ class OrderRepository implements OrderRepositoryInterface
     }
 
     /**
+     * @param string $paymentIdPath
+     * @return OrderInterface|OrderResource
+     * @throws NoSuchEntityException
+     */
+    public function getByPaymentIdPath($paymentIdPath)
+    {
+        /** @var OrderModel $order */
+        $order = $this->orderFactory->create();
+        $this->orderResource->load($order, $paymentIdPath, 'payment_id_path');
+        if (!$order->getId()) {
+            throw new NoSuchEntityException(
+                __("The order that was requested doesn't exist. Verify the Swedbank Pay payment id path and try again.")
+            );
+        }
+        return $order;
+    }
+
+    /**
      * @param OrderInterface $order
      * @return OrderInterface
      * @throws Exception
