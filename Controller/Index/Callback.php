@@ -18,7 +18,7 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Order as MagentoOrder;
-use PayEx\Api\Service\Payment\Transaction\Resource\Response\Data\TransactionInterface;
+use SwedbankPay\Api\Service\Payment\Transaction\Resource\Response\Data\TransactionInterface;
 use SwedbankPay\Core\Helper\Order as OrderHelper;
 use SwedbankPay\Core\Logger\Logger;
 use SwedbankPay\Payments\Api\Data\OrderInterface;

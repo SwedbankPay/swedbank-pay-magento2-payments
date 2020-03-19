@@ -4,8 +4,8 @@
 namespace SwedbankPay\Payments\Model\Instrument\Data;
 
 use Magento\Sales\Model\Order;
-use PayEx\Api\Service\Payment\Transaction\Resource\Request\TransactionObject;
-use PayEx\Api\Service\Resource\Request as RequestResource;
+use SwedbankPay\Api\Service\Payment\Transaction\Resource\Request\TransactionObject;
+use SwedbankPay\Api\Service\Resource\Request as RequestResource;
 use SwedbankPay\Payments\Api\Data\OrderInterface as SwedbankPayOrderInterface;
 
 interface InstrumentInterface

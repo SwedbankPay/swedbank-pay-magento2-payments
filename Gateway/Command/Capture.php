@@ -79,7 +79,7 @@ class Capture extends AbstractCommand
      * @return void
      * @throws NoSuchEntityException
      * @throws \SwedbankPay\Core\Exception\ServiceException
-     * @throws \PayEx\Api\Client\Exception
+     * @throws \SwedbankPay\Api\Client\Exception
      * @throws LocalizedException
      */
     public function execute(array $commandSubject)

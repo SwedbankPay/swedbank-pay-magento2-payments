@@ -8,7 +8,7 @@ use Magento\Payment\Model\InfoInterface;
 use Magento\Quote\Model\QuoteRepository as MageQuoteRepository;
 use Magento\Sales\Model\Order as MageOrder;
 use Magento\Sales\Model\OrderRepository as MageOrderRepository;
-use PayEx\Api\Client\Exception;
+use SwedbankPay\Api\Client\Exception;
 use SwedbankPay\Core\Exception\ServiceException;
 use SwedbankPay\Core\Exception\SwedbankPayException;
 use SwedbankPay\Core\Helper\Order as OrderHelper;

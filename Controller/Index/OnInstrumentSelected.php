@@ -10,7 +10,7 @@ use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Controller\ResultInterface;
 use Magento\Framework\Event\Manager as EventManager;
 use Magento\Store\Model\StoreManagerInterface;
-use PayEx\Api\Client\Exception;
+use SwedbankPay\Api\Client\Exception;
 use SwedbankPay\Core\Exception\ServiceException;
 use SwedbankPay\Core\Logger\Logger;
 use SwedbankPay\Payments\Helper\Config as ConfigHelper;

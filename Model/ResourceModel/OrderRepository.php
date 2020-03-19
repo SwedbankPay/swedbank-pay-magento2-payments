@@ -121,7 +121,7 @@ class OrderRepository implements OrderRepositoryInterface
         $this->orderResource->load($order, $paymentId, 'payment_id');
         if (!$order->getId()) {
             throw new NoSuchEntityException(
-                __("The order that was requested doesn't exist. Verify the PayEx payment order id and try again.")
+                __("The order that was requested doesn't exist. Verify the Swedbank Pay payment order id and try again.")
             );
         }
         return $order;

@@ -4,9 +4,9 @@ namespace SwedbankPay\Payments\Model\Instrument;
 
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Sales\Model\Order;
-use PayEx\Api\Service\Payment\Transaction\Resource\Request\TransactionObject;
-use PayEx\Api\Service\Resource\Request as RequestResource;
-use PayEx\Api\Service\Swish\Transaction\Resource\Request\TransactionReversal;
+use SwedbankPay\Api\Service\Payment\Transaction\Resource\Request\TransactionObject;
+use SwedbankPay\Api\Service\Resource\Request as RequestResource;
+use SwedbankPay\Api\Service\Swish\Transaction\Resource\Request\TransactionReversal;
 use SwedbankPay\Payments\Api\Data\OrderInterface as SwedbankPayOrderInterface;
 
 class Swish extends AbstractInstrument

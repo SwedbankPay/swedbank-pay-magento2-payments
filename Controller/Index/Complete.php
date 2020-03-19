@@ -81,7 +81,7 @@ class Complete extends PaymentActionAbstract implements CsrfAwareActionInterface
     /**
      * @throws ServiceException
      * @throws \Magento\Framework\Exception\NoSuchEntityException
-     * @throws \PayEx\Api\Client\Exception
+     * @throws \SwedbankPay\Api\Client\Exception
      */
     public function complete()
     {
