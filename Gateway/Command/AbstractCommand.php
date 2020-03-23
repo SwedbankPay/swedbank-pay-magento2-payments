@@ -141,7 +141,7 @@ abstract class AbstractCommand extends DataObject implements CommandInterface
      */
     protected function generateRandomString($length)
     {
-        return substr(str_shuffle(md5(time())), 0, $length);
+        return substr(str_shuffle(hash('sha256', time())), 0, $length);
     }
 
     /**
@@ -163,6 +163,7 @@ abstract class AbstractCommand extends DataObject implements CommandInterface
                 $command,
                 $mageOrder->getEntityId(),
                 $paymentId,
+                // phpcs:ignore Magento2.Functions.DiscouragedFunction
                 print_r($responseResource, true)
             )
         );
@@ -199,6 +200,7 @@ abstract class AbstractCommand extends DataObject implements CommandInterface
                 $command,
                 $mageOrder->getEntityId(),
                 $paymentId,
+                // phpcs:ignore Magento2.Functions.DiscouragedFunction
                 print_r($responseData, true)
             )
         );
@@ -237,6 +239,7 @@ abstract class AbstractCommand extends DataObject implements CommandInterface
         }
 
         $this->logger->error(
+            // phpcs:ignore Magento2.Functions.DiscouragedFunction
             sprintf("Unable to find a SwedbankPay payment matching order:\n%s", print_r($order, true))
         );
 
@@ -257,6 +260,8 @@ abstract class AbstractCommand extends DataObject implements CommandInterface
     protected function checkRemainingAmount($command, $amount, $mageOrder, $swedbankPayOrder)
     {
         $getMethod = 'getRemaining' . ucfirst($this->cmdTransActionMap[$command]) . 'Amount';
+
+        // phpcs:ignore Magento2.Functions.DiscouragedFunction
         $remainingAmount = (int)call_user_func([$swedbankPayOrder, $getMethod]);
 
         if ($remainingAmount >= ($amount * 100)) {
@@ -316,6 +321,7 @@ abstract class AbstractCommand extends DataObject implements CommandInterface
                         $command,
                         $mageOrder->getEntityId(),
                         $swedbankPayOrder->getPaymentId(),
+                        // phpcs:ignore Magento2.Functions.DiscouragedFunction
                         print_r($responseData, true)
                     )
                 );
@@ -329,7 +335,6 @@ abstract class AbstractCommand extends DataObject implements CommandInterface
                         )
                     )
                 );
-                break;
         }
 
         return $status;

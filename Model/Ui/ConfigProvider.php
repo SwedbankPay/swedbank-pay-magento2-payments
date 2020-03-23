@@ -5,7 +5,7 @@ namespace SwedbankPay\Payments\Model\Ui;
 /**
  * Class ConfigProvider
  */
-final class ConfigProvider implements \Magento\Checkout\Model\ConfigProviderInterface
+class ConfigProvider implements \Magento\Checkout\Model\ConfigProviderInterface
 {
     const CODE = 'swedbank_pay_payments';
 

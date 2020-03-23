@@ -316,7 +316,7 @@ abstract class AbstractInstrument implements InstrumentInterface
      */
     protected function generateRandomString($length)
     {
-        return substr(str_shuffle(md5(time())), 0, $length);
+        return substr(str_shuffle(hash('sha256', time())), 0, $length);
     }
 
     /**
@@ -356,7 +356,6 @@ abstract class AbstractInstrument implements InstrumentInterface
 
         return $currency;
     }
-
 
     /**
      * Gets if the store currency is supported by the instrument

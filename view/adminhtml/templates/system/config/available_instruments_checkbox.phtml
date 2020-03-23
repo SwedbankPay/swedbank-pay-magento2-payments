@@ -1,16 +1,20 @@
-<input type="hidden" name="<?php echo $this->getNamePrefix(); ?>" value="" />
+<?php
+/** @var \SwedbankPay\Payments\Block\System\Config\AvailableInstruments $block */
+?>
+
+<input type="hidden" name="<?= $block->escapeHtml($block->getNamePrefix()) ?>" value="" />
 <ul class="checkboxes">
-    <?php foreach ($this->getValues() as $name => $label): ?>
+    <?php foreach ($block->getValues() as $name => $label) : ?>
         <li>
             <input type="checkbox"
-                   value="<?php echo $name?>"
-                   name="<?php echo $this->getNamePrefix() ?>[]"
-                   id="<?php echo $this->getHtmlId() . '_' . $name ?>"
-                <?php echo ($this->isChecked($name) ? ' checked="checked"' : '') ?>
-                <?php echo ($this->isDisabled() ? ' disabled="disabled"' : '') ?>
+                   value="<?= $block->escapeHtml($name) ?>"
+                   name="<?= $block->escapeHtml($block->getNamePrefix()) ?>[]"
+                   id="<?= $block->escapeHtml($block->getHtmlId() . '_' . $name) ?>"
+                <?= $block->escapeHtml($block->getCheckedHtml($name)) ?>
+                <?= $block->escapeHtml($block->getDisabledHtml()) ?>
             />
-            <label for="<?php echo $this->getHtmlId() . '_' . $name ?>">
-                <?php echo $label ?>
+            <label for="<?= $block->escapeHtml($block->getHtmlId() . '_' . $name) ?>">
+                <?= $block->escapeHtml($label) ?>
             </label>
         </li>
     <?php endforeach;?>

@@ -86,7 +86,6 @@ class OnInstrumentSelected extends PaymentActionAbstract
         $this->storeManager = $storeManager;
     }
 
-
     /**
      * @return Json|ResultInterface|ResponseInterface
      * @throws Exception
@@ -97,6 +96,7 @@ class OnInstrumentSelected extends PaymentActionAbstract
     {
         if (!$this->configHelper->isActive()) {
             $this->logger->error(
+                // phpcs:ignore Magento2.Functions.DiscouragedFunction
                 basename(get_class($this)) . ' trigger error: Module is not active'
             );
             return $this->setResult(

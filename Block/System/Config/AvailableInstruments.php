@@ -105,7 +105,7 @@ class AvailableInstruments extends Field
         return array_reduce($instruments, function (&$result, $instrument) {
             $result[$instrument['name']] = $instrument['pretty_name'];
             return $result;
-        }, array());
+        }, []);
     }
 
     /**
@@ -125,7 +125,7 @@ class AvailableInstruments extends Field
      */
     public function getCheckedValues()
     {
-        if (is_null($this->_values)) {
+        if ($this->_values === null) {
             $data = $this->getConfigData();
 
             if (isset($data[self::CONFIG_PATH])) {
@@ -146,5 +146,22 @@ class AvailableInstruments extends Field
     public function isDisabled()
     {
         return false;
+    }
+
+    /**
+     * @param string $name
+     * @return string
+     */
+    public function getCheckedHtml($name)
+    {
+        return $this->isChecked($name) ? ' checked="checked"' : '';
+    }
+
+    /**
+     * @return string
+     */
+    public function getDisabledHtml()
+    {
+        return $this->isDisabled() ? ' disabled="disabled"' : '';
     }
 }

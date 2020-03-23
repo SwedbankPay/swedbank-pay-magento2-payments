@@ -96,6 +96,7 @@ class OrderRepositoryPlugin
                 return $mageOrder;
             }
         } catch (Exception $e) {
+            $this->logger->debug(sprintf('SwedbankPay Order not found with ID # %s', $mageOrder->getEntityId()));
         }
 
         $this->logger->debug('OrderId in OrderRepositoryPlugin: ' . $mageOrder->getIncrementId());
@@ -117,7 +118,7 @@ class OrderRepositoryPlugin
         $swedbankPayOrder->setRemainingCancellationAmount($swedbankPayQuote->getRemainingCancellationAmount());
         $swedbankPayOrder->setRemainingReversalAmount($swedbankPayQuote->getRemainingReversalAmount());
         $swedbankPayOrder->setDescription($swedbankPayQuote->getDescription());
-        $swedbankPayOrder->setInitiatingSystemUserAgent($_SERVER['HTTP_USER_AGENT']);
+        $swedbankPayOrder->setInitiatingSystemUserAgent($this->config->getHttpUserAgent());
         $swedbankPayOrder->setOrderId($mageOrder->getEntityId());
 
         try {

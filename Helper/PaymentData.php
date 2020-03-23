@@ -88,6 +88,7 @@ class PaymentData
         }
 
         $this->logger->error(
+            // phpcs:ignore Magento2.Functions.DiscouragedFunction
             sprintf("Unable to find a SwedbankPay payment matching order:\n%s", print_r($order, true))
         );
 
@@ -112,6 +113,9 @@ class PaymentData
         try {
             $paymentData = $this->paymentOrderRepo->getByPaymentId($paymentId);
         } catch (NoSuchEntityException $e) {
+            $this->logger->error(
+                sprintf("Unable to find a SwedbankPay Payments Order with payment_id: %s", $paymentId)
+            );
         }
 
         if ($paymentData instanceof PaymentOrderInterface) {
@@ -121,6 +125,9 @@ class PaymentData
         try {
             $paymentData = $this->paymentQuoteRepo->getByPaymentId($paymentId);
         } catch (NoSuchEntityException $e) {
+            $this->logger->error(
+                sprintf("Unable to find a SwedbankPay Payments Quote with payment_id: %s", $paymentId)
+            );
         }
 
         if ($paymentData instanceof PaymentQuoteInterface) {
@@ -154,6 +161,9 @@ class PaymentData
         try {
             $paymentData = $this->paymentOrderRepo->getByPaymentIdPath($paymentIdPath);
         } catch (NoSuchEntityException $e) {
+            $this->logger->error(
+                sprintf("Unable to find a SwedbankPay Payments Order with payment_id_path: %s", $paymentIdPath)
+            );
         }
 
         if ($paymentData instanceof PaymentOrderInterface) {
@@ -163,6 +173,9 @@ class PaymentData
         try {
             $paymentData = $this->paymentQuoteRepo->getByPaymentIdPath($paymentIdPath);
         } catch (NoSuchEntityException $e) {
+            $this->logger->error(
+                sprintf("Unable to find a SwedbankPay Payments Order with payment_id_path: %s", $paymentIdPath)
+            );
         }
 
         if ($paymentData instanceof PaymentQuoteInterface) {

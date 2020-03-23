@@ -27,7 +27,11 @@ class SubresourceFactory
      */
     public function create($instrument, $subresource)
     {
-        $className = 'SwedbankPay\\Api\\Service\\' . ucfirst($instrument) . '\\Resource\\Request\\' . ucfirst($subresource);
+        $className =
+            'SwedbankPay\\Api\\Service\\' .
+            ucfirst($instrument) .
+            '\\Resource\\Request\\' .
+            ucfirst($subresource);
 
         return $this->objectManager->create($className);
     }

@@ -121,7 +121,7 @@ class OrderRepository implements OrderRepositoryInterface
         $this->orderResource->load($order, $paymentId, 'payment_id');
         if (!$order->getId()) {
             throw new NoSuchEntityException(
-                __("The order that was requested doesn't exist. Verify the Swedbank Pay payment order id and try again.")
+                __("The order that was requested doesn't exist. Verify the SwedbankPay payment_id and try again.")
             );
         }
         return $order;
@@ -139,7 +139,7 @@ class OrderRepository implements OrderRepositoryInterface
         $this->orderResource->load($order, $paymentIdPath, 'payment_id_path');
         if (!$order->getId()) {
             throw new NoSuchEntityException(
-                __("The order that was requested doesn't exist. Verify the Swedbank Pay payment id path and try again.")
+                __("The order that was requested doesn't exist. Verify the SwedbankPay payment_id_path and try again.")
             );
         }
         return $order;

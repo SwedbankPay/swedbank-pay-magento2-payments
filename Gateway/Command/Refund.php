@@ -99,7 +99,6 @@ class Refund extends AbstractCommand
             sprintf('Refund command is called for Order ID %s', $order->getEntityId())
         );
 
-
         $swedbankPayOrder = $this->paymentOrderRepo->getByOrderId($order->getEntityId());
 
         $this->checkRemainingAmount('refund', $amount, $order, $swedbankPayOrder);

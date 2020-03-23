@@ -66,7 +66,6 @@ class Invoice extends AbstractInstrument
      */
     protected $calculator;
 
-
     /**
      * Invoice constructor.
      * @param CheckoutSession $checkoutSession
