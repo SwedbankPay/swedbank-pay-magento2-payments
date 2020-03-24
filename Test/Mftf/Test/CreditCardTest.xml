@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<tests xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:noNamespaceSchemaLocation="urn:magento:mftf:Test/etc/testSchema.xsd">
+    <test name="CreditCardTest">
+        <annotations>
+            <features value="SwedbankPayPaymentsPlaceOrder"/>
+            <stories value="Place Order within SwedbankPay Payments"/>
+            <title value="Place order via creditcard in redirect view using OnePageCheckout"/>
+            <description value="Place order via creditcard in redirect view using OnePageCheckout"/>
+            <severity value="CRITICAL"/>
+            <testCaseId value="SWEPAY-PAYMENTS-1"/>
+            <group value="checkout"/>
+            <group value="mtf_migrated"/>
+        </annotations>
+
+        <before>
+            <magentoCLI command="config:set swedbank_pay/core/active 1" stepKey="enableCoreModule"/>
+            <magentoCLI command="config:set swedbank_pay/core/merchant_token {{_CREDS.swedbank_pay/merchant_token}}" stepKey="enterMerchantToken"/>
+            <magentoCLI command="config:set swedbank_pay/core/payee_id {{_CREDS.swedbank_pay/payee_id}}" stepKey="enterPayeeId"/>
+            <magentoCLI command="config:set swedbank_pay/core/payee_name {{_CREDS.swedbank_pay/payee_name}}" stepKey="enterPayeeName"/>
+
+            <magentoCLI command="config:set payment/swedbank_pay_payments/active 1" stepKey="enablePaymentsModule"/>
+            <magentoCLI command="config:set payment/swedbank_pay_payments/available_instruments creditcard --scope=stores --scope-code=default" stepKey="enterInstruments"/>
+            <magentoCLI command="cache:flush" stepKey="flushCache"/>
+        </before>
+
+        <!-- Go to a specific product page -->
+        <amOnPage url="fusion-backpack.html" stepKey="goToProductPage" />
+
+        <!-- Click "Add Product" button -->
+        <waitForAjaxLoad stepKey="waitForAjaxLoadOnProductPage"/>
+        <click selector="#product-addtocart-button" stepKey="clickAddProductButton" />
+
+        <!-- See success message of added product -->
+        <waitForAjaxLoad time="120" stepKey="waitForAjaxLoadOnProductAdd"/>
+        <seeElement selector=".message.success" stepKey="seeProductAddedSuccessMessage"/>
+
+        <!-- Go to checkout page -->
+        <amOnPage url="checkout" stepKey="goToCheckout" />
+
+        <!-- Fill in shipping details -->
+        <waitForLoadingMaskToDisappear stepKey="waitForCheckoutPageLoadingMaskToDisappear" />
+        <actionGroup stepKey="FillShippingDetails" ref="FillShippingDetails" />
+
+        <!-- Select the first shipping method -->
+        <wait time="10" stepKey="waitForLoadingCorrectShippingMethods" />
+        <waitForLoadingMaskToDisappear stepKey="waitForShippingMethodLoadingMaskToDisappear"/>
+        <click selector="{{CheckoutShippingSection.firstShippingMethod}}" stepKey="selectFirstShippingMethod"/>
+
+        <!-- Click "Next" button -->
+        <waitForElement selector="{{CheckoutShippingSection.next}}" time="30" stepKey="waitForNextButton"/>
+        <click selector="{{CheckoutShippingSection.next}}" stepKey="clickNext" />
+
+        <!-- See 'payment' in the current url -->
+        <waitForElement selector="{{CheckoutPaymentSection.paymentSectionTitle}}" time="30" stepKey="waitForPaymentSectionLoaded"/>
+        <seeInCurrentUrl url="payment" stepKey="seePaymentInCurrentUrl"/>
+
+        <!-- See 'swedbank_pay_payments' method loaded in the section -->
+        <waitForLoadingMaskToDisappear stepKey="waitForPaymentMethodsLoadingMaskToDisappear"/>
+        <seeElement selector="#swedbank_pay_payments" stepKey="seeSwedbankPayPaymentsMethod" />
+
+        <!-- Select 'swedbank_pay_payments' payment method -->
+        <click selector="#swedbank_pay_payments" stepKey="clickSwedbankPayPaymentsMethod" />
+
+        <!-- Select 'creditcard' payment instrument -->
+        <click selector=".payment-instrument label[instrument=creditcard]" stepKey="clickCreditcardInstrument" />
+
+        <!-- Wait for content to load -->
+        <waitForAjaxLoad stepKey="waitForCreditcardAjaxToLoad" />
+        <wait time="10" stepKey="waitForCreditcardContentToLoad" />
+        <waitForElement selector=".payment-instrument label[instrument=creditcard] + .view .btn-redirect" stepKey="waitForRedirectButtonToLoad" />
+
+        <!-- Click redirect button -->
+        <click selector=".payment-instrument label[instrument=creditcard] + .view .btn-redirect" stepKey="clickRedirectButton" />
+
+        <!-- Switch to the iframe -->
+        <waitForPageLoad stepKey="waitForCreditcardPaymentPageToLoad" />
+        <executeJS function="document.querySelector('.panel-body iframe').setAttribute('name', 'swe-iframe');" stepKey="AttachNameToIframe"/>
+        <switchToIFrame userInput="swe-iframe" stepKey="switchToIFrame"/>
+
+        <!-- Fill in payment details -->
+        <fillField userInput="{{_CREDS.swedbank_pay/credit_card_number}}" selector="#panInput" stepKey="fillCreditCard" />
+        <fillField userInput="{{_CREDS.swedbank_pay/credit_card_expiry}}" selector="#expiryInput" stepKey="fillExpiryDate" />
+        <fillField userInput="{{_CREDS.swedbank_pay/credit_card_cvc}}" selector="#cvcInput" stepKey="fillCVC" />
+
+        <!-- Click pay button -->
+        <click selector="#px-submit" stepKey="clickCreditcardPayButton" />
+
+        <!-- See 'checkout/onepage/success' in the current url -->
+        <waitForPageLoad stepKey="waitForSuccessPageToLoad" />
+        <seeInCurrentUrl url="checkout/onepage/success" stepKey="SeeSuccessInUrl"/>
+    </test>
+</tests>

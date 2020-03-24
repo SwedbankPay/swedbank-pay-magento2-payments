@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<entities xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:noNamespaceSchemaLocation="urn:magento:mftf:DataGenerator/etc/dataProfileSchema.xsd">
+    <entity name="SwedbankPayCustomer" type="customer">
+        <data key="email">shahriar.siraj@visma.com</data>
+        <data key="firstname">Shahriar</data>
+        <data key="lastname">Siraj</data>
+        <data key="street">S:t Persgatan 50</data>
+        <data key="city">Norrköping</data>
+        <data key="postcode">602 33</data>
+        <data key="country">Sweden</data>
+        <data key="telephone">0760727900</data>
+    </entity>
+</entities>

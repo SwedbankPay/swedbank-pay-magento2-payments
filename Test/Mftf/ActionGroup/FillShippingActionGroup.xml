@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<actionGroups xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:noNamespaceSchemaLocation="urn:magento:mftf:Test/etc/actionGroupSchema.xsd">
+    <actionGroup name="FillShippingDetails">
+        <annotations>
+            <description>Fill in shipping details.</description>
+        </annotations>
+
+        <arguments>
+            <argument name="customer" defaultValue="SwedbankPayCustomer" type="entity"/>
+        </arguments>
+
+        <fillField selector="{{CheckoutShippingSection.emailAddress}}" userInput="{{customer.email}}" stepKey="setCustomerEmail"/>
+        <fillField selector="{{CheckoutShippingSection.firstName}}" userInput="{{customer.firstname}}" stepKey="SetCustomerFirstName"/>
+        <fillField selector="{{CheckoutShippingSection.lastName}}" userInput="{{customer.lastname}}" stepKey="SetCustomerLastName"/>
+        <fillField selector="{{CheckoutShippingSection.street}}" userInput="{{customer.street}}" stepKey="SetCustomerStreetAddress"/>
+        <fillField selector="{{CheckoutShippingSection.city}}" userInput="{{customer.city}}" stepKey="SetCustomerCity"/>
+        <fillField selector="{{CheckoutShippingSection.postcode}}" userInput="{{customer.postcode}}" stepKey="SetCustomerZipCode"/>
+        <fillField selector="{{CheckoutShippingSection.telephone}}" userInput="{{customer.telephone}}" stepKey="SetCustomerPhoneNumber"/>
+        <selectOption selector="{{CheckoutShippingSection.country}}" userInput="{{customer.country}}" stepKey="selectCustomerCountry" after="SetCustomerCity"/>
+    </actionGroup>
+</actionGroups>
