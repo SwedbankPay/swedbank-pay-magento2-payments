@@ -1,0 +1,21 @@
+<?php
+/** @var \SwedbankPay\Payments\Block\System\Config\AvailableInstruments $block */
+?>
+
+<input type="hidden" name="<?= $block->escapeHtml($block->getNamePrefix()) ?>" value="" />
+<ul class="checkboxes">
+    <?php foreach ($block->getValues() as $name => $label) : ?>
+        <li>
+            <input type="checkbox"
+                   value="<?= $block->escapeHtml($name) ?>"
+                   name="<?= $block->escapeHtml($block->getNamePrefix()) ?>[]"
+                   id="<?= $block->escapeHtml($block->getHtmlId() . '_' . $name) ?>"
+                <?= $block->escapeHtml($block->getCheckedHtml($name)) ?>
+                <?= $block->escapeHtml($block->getDisabledHtml()) ?>
+            />
+            <label for="<?= $block->escapeHtml($block->getHtmlId() . '_' . $name) ?>">
+                <?= $block->escapeHtml($label) ?>
+            </label>
+        </li>
+    <?php endforeach;?>
+</ul>

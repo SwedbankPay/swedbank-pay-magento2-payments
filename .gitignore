@@ -1,0 +1,6 @@
+.idea/
+auth.json
+composer.lock
+vendor/
+*.zip
+validate_m2_package.php
