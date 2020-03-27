@@ -22,7 +22,8 @@
   },
   "require-dev": {
     "squizlabs/php_codesniffer": "^3.4",
-    "phpmd/phpmd": "~2.6.0"
+    "phpmd/phpmd": "~2.6.0",
+    "magento/magento-coding-standard": "*"
   },
   "repositories": {
     "magento": {
@@ -37,5 +38,13 @@
     "psr-4": {
       "SwedbankPay\\Payments\\": ""
     }
+  },
+  "scripts": {
+    "post-install-cmd": [
+      "([ $COMPOSER_DEV_MODE -eq 0 ] || vendor/bin/phpcs --config-set installed_paths ../../magento/magento-coding-standard/)"
+    ],
+    "post-update-cmd": [
+      "([ $COMPOSER_DEV_MODE -eq 0 ] || vendor/bin/phpcs --config-set installed_paths ../../magento/magento-coding-standard/)"
+    ]
   }
 }
