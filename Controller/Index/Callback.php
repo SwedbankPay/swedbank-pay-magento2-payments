@@ -261,7 +261,7 @@ class Callback extends PaymentActionAbstract implements CsrfAwareActionInterface
                     $order->setStatus(MagentoOrder::STATE_PROCESSING);
                 }
 
-                $order->addCommentToStatusHistory('SwedbankPay payment processed successfully.', $order->getStatus());
+                $order->addStatusToHistory($order->getStatus(), 'SwedbankPay payment processed successfully.');
                 $this->magentoOrderRepo->save($order);
 
                 if (($paymentData instanceof OrderInterface) && $paymentData->getIntent() == 'Sale') {
@@ -272,7 +272,7 @@ class Callback extends PaymentActionAbstract implements CsrfAwareActionInterface
                 $order->setState(MagentoOrder::STATE_CANCELED);
                 $order->setStatus(MagentoOrder::STATE_CANCELED);
 
-                $order->addCommentToStatusHistory('SwedbankPay payment failed, cancelled order.');
+                $order->addStatusToHistory($order->getStatus(), 'SwedbankPay payment failed, cancelled order.');
                 $this->magentoOrderRepo->save($order);
                 break;
         }
