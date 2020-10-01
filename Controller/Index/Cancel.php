@@ -91,6 +91,7 @@ class Cancel extends PaymentActionAbstract implements CsrfAwareActionInterface
     /**
      * @throws \Magento\Framework\Exception\InputException
      * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function restoreQuote()
     {
