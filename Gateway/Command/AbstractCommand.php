@@ -257,14 +257,14 @@ abstract class AbstractCommand extends DataObject implements CommandInterface
      * @param PaymentOrderInterface|PaymentQuoteInterface $swedbankPayOrder
      * @throws SwedbankPayException
      */
-    protected function checkRemainingAmount($command, $amount, $mageOrder, $swedbankPayOrder)
+    public function checkRemainingAmount($command, $amount, $mageOrder, $swedbankPayOrder)
     {
         $getMethod = 'getRemaining' . ucfirst($this->cmdTransActionMap[$command]) . 'Amount';
 
         // phpcs:ignore Magento2.Functions.DiscouragedFunction
         $remainingAmount = (int)call_user_func([$swedbankPayOrder, $getMethod]);
 
-        if ($remainingAmount >= ($amount * 100)) {
+        if ($remainingAmount >= (int) round($amount * 100)) {
             return;
         }
 
