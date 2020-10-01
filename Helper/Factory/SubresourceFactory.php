@@ -2,23 +2,8 @@
 
 namespace SwedbankPay\Payments\Helper\Factory;
 
-use Magento\Framework\ObjectManagerInterface;
-
 class SubresourceFactory
 {
-    /**
-     * @var ObjectManagerInterface
-     */
-    protected $objectManager;
-
-    /**
-     * SubresourceFactory constructor.
-     * @param ObjectManagerInterface $objectManager
-     */
-    public function __construct(ObjectManagerInterface $objectManager)
-    {
-        $this->objectManager = $objectManager;
-    }
 
     /**
      * @param string $instrument
@@ -33,6 +18,6 @@ class SubresourceFactory
             '\\Resource\\Request\\' .
             ucfirst($subresource);
 
-        return $this->objectManager->create($className);
+        return new $className();
     }
 }
