@@ -3,10 +3,11 @@
 namespace SwedbankPay\Payments\Model\Instrument;
 
 use Exception;
-use Magento\Braintree\Model\LocaleResolver;
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Framework\Locale\ResolverInterface as LocaleResolver;
 use Magento\Framework\UrlInterface;
 use Magento\Sales\Model\Order;
 use Magento\Store\Model\StoreManagerInterface;
@@ -76,6 +77,7 @@ class Creditcard extends AbstractInstrument
     /**
      * @return RequestResource
      * @throws NoSuchEntityException
+     * @throws LocalizedException
      */
     public function createPaymentObject()
     {
