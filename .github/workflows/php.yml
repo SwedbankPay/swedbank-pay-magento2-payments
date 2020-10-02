@@ -103,6 +103,9 @@ jobs:
     - name: PHPCS Check
       run: ./vendor/bin/phpcs --standard=Magento2 --report=code --ignore=vendor/* --runtime-set ignore_warnings_on_exit true .
 
+    - name: PHPUnit
+      run: ./vendor/bin/phpunit ./Test/Unit
+
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
