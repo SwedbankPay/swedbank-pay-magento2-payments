@@ -2,6 +2,7 @@
 
 namespace SwedbankPay\Payments\Model\Instrument;
 
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Sales\Model\Order;
 use SwedbankPay\Api\Service\Payment\Transaction\Resource\Request\TransactionObject;
@@ -21,6 +22,7 @@ class Vipps extends AbstractInstrument
 
     /**
      * @return RequestResource
+     * @throws LocalizedException
      * @throws NoSuchEntityException
      */
     public function createPaymentObject()

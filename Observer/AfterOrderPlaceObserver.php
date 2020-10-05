@@ -46,6 +46,9 @@ class AfterOrderPlaceObserver implements ObserverInterface
 
     /**
      * @param Observer $observer
+     * @throws \Magento\Framework\Exception\AlreadyExistsException
+     * @throws \Magento\Framework\Exception\InputException
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     public function execute(Observer $observer)
     {

@@ -2,11 +2,12 @@
 
 namespace SwedbankPay\Payments\Model\Instrument;
 
-use Magento\Braintree\Model\LocaleResolver;
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Locale\Resolver;
+use Magento\Framework\Locale\ResolverInterface as LocaleResolver;
 use Magento\Framework\UrlInterface;
 use Magento\Quote\Model\Quote;
 use Magento\Store\Model\ScopeInterface;
@@ -217,6 +218,11 @@ abstract class AbstractInstrument implements InstrumentInterface
         return $this->allowedCurrencies;
     }
 
+    /**
+     * @return PricesCollection
+     * @throws NoSuchEntityException
+     * @throws LocalizedException
+     */
     public function createPricesCollectionObject()
     {
         /** @var Quote $quote */

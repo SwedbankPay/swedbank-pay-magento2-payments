@@ -2,7 +2,7 @@
 
 namespace SwedbankPay\Payments\Model\Instrument;
 
-use Magento\Braintree\Model\LocaleResolver;
+use Magento\Framework\Locale\ResolverInterface as LocaleResolver;
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Customer\Api\GroupRepositoryInterface;
 use Magento\Framework\App\Config\ScopeConfigInterface;
@@ -120,6 +120,7 @@ class Invoice extends AbstractInstrument
     /**
      * @return RequestResource
      * @throws NoSuchEntityException
+     * @throws LocalizedException
      */
     public function createPaymentObject()
     {
