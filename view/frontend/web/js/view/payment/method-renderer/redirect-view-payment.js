@@ -62,20 +62,21 @@ define([
             var self = this;
             self.totals = {};
             self.instrumentScript = '';
+            self.instrumentElement = {};
 
             self._super();
             Object.assign(this.config.data, window.checkoutConfig.SwedbankPay_Payments);
             Object.assign(this.config.data, window.checkoutConfig.SwedbankPay_Payments_Instrument_List);
 
-            // quote.totals.subscribe(function(totals) {
-            //     if(self.totals.grand_total !== totals.grand_total) {
-            //         if(self.getCode() == self.isChecked()) {
-            //             self.updatePaymentScript();
-            //         }
-            //     }
-            //
-            //     self.totals = totals;
-            // });
+            quote.totals.subscribe(function(totals) {
+                if (self.totals.grand_total !== totals.grand_total) {
+                    if (self.getCode() === self.isChecked()) {
+                        self.onPaymentInstrumentSelected(self.instrumentElement, null);
+                    }
+                }
+
+                self.totals = totals;
+            });
         },
         getAvailableInstruments: function () {
             let self = this;
@@ -87,6 +88,7 @@ define([
             let self = this;
             console.log(element.pretty_name + ' Payment Instrument Selected');
 
+            self.instrumentElement = element;
             self.startLoader();
 
             storage.get(
