@@ -42,6 +42,7 @@ define([
 
     var redirectUrl = ko.observable('');
     var isRedirectUrlVisible = ko.observable(false);
+    var paymentErrors = ko.observable([]);
 
     return Component.extend({
         defaults: {
@@ -55,6 +56,7 @@ define([
         },
         redirectUrl: redirectUrl,
         isRedirectUrlVisible: isRedirectUrlVisible,
+        paymentErrors: paymentErrors,
         logoUrl: function () {
             return require.toUrl(this.config.data.logo);
         },
@@ -104,7 +106,11 @@ define([
                 }
             }).fail(function(message){
                 console.error(message);
-                self.stopLoader();
+
+                var response = JSON.parse(message.responseJSON.result);
+
+                self.paymentErrors(response.problems);
+                self.showError();
             });
 
             return true;
@@ -113,6 +119,7 @@ define([
             let self = this;
 
             self.redirectUrl(redirectUrl);
+            self.paymentErrors([]);
 
             if (self.redirectUrl === '') {
                 self.isRedirectUrlVisible(false);
@@ -137,13 +144,25 @@ define([
                 window.location.href = self.redirectUrl();
             }
         },
+        getPaymentErrors: function () {
+            let self = this;
+
+            return self.paymentErrors();
+        },
         startLoader: function () {
             $('.payment-instrument-list .payment-instrument .view .content').hide();
             $('.payment-instrument-list .payment-instrument .view .spinner').show();
+            $('.payment-instrument-list .payment-instrument .view .error').hide();
         },
         stopLoader: function () {
             $('.payment-instrument-list .payment-instrument .view .content').show();
             $('.payment-instrument-list .payment-instrument .view .spinner').hide();
+            $('.payment-instrument-list .payment-instrument .view .error').hide();
+        },
+        showError: function () {
+            $('.payment-instrument-list .payment-instrument .view .error').show();
+            $('.payment-instrument-list .payment-instrument .view .spinner').hide();
+            $('.payment-instrument-list .payment-instrument .view .content').hide();
         }
     })
 });

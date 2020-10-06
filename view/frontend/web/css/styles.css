@@ -184,3 +184,44 @@
            -webkit-transform: scaleY(1.0);
        }
 }
+
+.payment-instrument-error.alert {
+    padding: 16px;
+    position: relative;
+    margin-top: 0;
+    margin-bottom: 1rem;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+}
+
+.payment-instrument-error.alert {
+    color: #222;
+}
+
+.payment-instrument-error.alert>p {
+    margin-bottom: 0;
+}
+
+.payment-instrument-error.alert .alert-icon {
+    margin-right: 1rem;
+}
+
+.payment-instrument-error.alert.alert-danger {
+    background-color: #f9ded3;
+    border-left: 4px solid #c5131c;
+}
+
+.payment-instrument-error.alert.alert-danger .alert-icon {
+    color: #c5131c;
+}
+
+.payment-instrument-list .payment-instrument .view .error i {
+    color: #c5131c;
+    font-size: 50px;
+    display: block;
+    text-align: center;
+}

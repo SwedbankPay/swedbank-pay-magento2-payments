@@ -46,6 +46,7 @@ define([
     'use strict';
 
     const hostedUrl = ko.observable('');
+    var paymentErrors = ko.observable([]);
 
     return Component.extend({
         defaults: {
@@ -58,6 +59,7 @@ define([
             }
         },
         hostedUrl: hostedUrl,
+        paymentErrors: paymentErrors,
         logoUrl: function () {
             return require.toUrl(this.config.data.logo);
         },
@@ -100,6 +102,7 @@ define([
 
             script.type = "text/javascript";
             script.id = "paymentMenuScript";
+            self.paymentErrors([]);
 
             $('.checkout-index-index').append(script);
 
@@ -175,12 +178,11 @@ define([
                 }
             }).fail(function(message) {
                 console.error(message);
-                messageContainer.addErrorMessage({
-                    message: 'Something went wrong'
-                });
 
-                self.stopLoader();
-                window.location.reload();
+                var response = JSON.parse(message.responseJSON.result);
+
+                self.paymentErrors(response.problems);
+                self.showError();
             });
 
             return true;
@@ -213,13 +215,25 @@ define([
                 window.location.href = event.url;
             }
         },
+        getPaymentErrors: function () {
+            let self = this;
+
+            return self.paymentErrors();
+        },
         startLoader: function () {
             $('.payment-instrument-list .payment-instrument .view .content').hide();
             $('.payment-instrument-list .payment-instrument .view .spinner').show();
+            $('.payment-instrument-list .payment-instrument .view .error').hide();
         },
         stopLoader: function () {
             $('.payment-instrument-list .payment-instrument .view .content').show();
             $('.payment-instrument-list .payment-instrument .view .spinner').hide();
+            $('.payment-instrument-list .payment-instrument .view .error').hide();
+        },
+        showError: function () {
+            $('.payment-instrument-list .payment-instrument .view .error').show();
+            $('.payment-instrument-list .payment-instrument .view .spinner').hide();
+            $('.payment-instrument-list .payment-instrument .view .content').hide();
         }
     })
 });
