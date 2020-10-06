@@ -2,6 +2,7 @@
 
 namespace SwedbankPay\Payments\Controller\Index;
 
+use Exception;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\App\Request\Http as HttpRequest;
 use Magento\Framework\App\ResponseInterface;
@@ -10,7 +11,7 @@ use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Controller\ResultInterface;
 use Magento\Framework\Event\Manager as EventManager;
 use Magento\Store\Model\StoreManagerInterface;
-use SwedbankPay\Api\Client\Exception;
+use SwedbankPay\Api\Client\Exception as ClientException;
 use SwedbankPay\Core\Exception\ServiceException;
 use SwedbankPay\Core\Logger\Logger;
 use SwedbankPay\Payments\Helper\Config as ConfigHelper;
@@ -88,9 +89,6 @@ class OnInstrumentSelected extends PaymentActionAbstract
 
     /**
      * @return Json|ResultInterface|ResponseInterface
-     * @throws Exception
-     * @throws ServiceException
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     public function execute()
     {
@@ -109,11 +107,17 @@ class OnInstrumentSelected extends PaymentActionAbstract
 
         try {
             $paymentInstrument = $this->instrumentFactory->create($instrument);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return $this->setResult('Instrument not found', 400);
         }
 
-        $responseService = $this->serviceHelper->payment($instrument);
+        try {
+            $responseService = $this->serviceHelper->payment($instrument);
+        } catch (ClientException $e) {
+            return $this->setResult($e->getMessage(), 400);
+        } catch (ServiceException $e) {
+            return $this->setResult($e->getMessage(), 400);
+        }
 
         $this->paymentDataHelper->saveQuoteToDB($responseService->getResponseData(), $instrument);
 
