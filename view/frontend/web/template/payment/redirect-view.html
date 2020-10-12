@@ -9,6 +9,13 @@
     </div>
     <div class="payment-method-content">
 
+        <div class="payment-instrument-error-list" data-bind="foreach: getPaymentErrors()">
+            <div class="payment-instrument-error alert alert-danger">
+                <i class="material-icons alert-icon">error</i>
+                <p data-bind="text: $data.description"></p>
+            </div>
+        </div>
+
         <div class="payment-instrument-list" data-bind="foreach: getAvailableInstruments()">
             <div class="payment-instrument">
                 <input data-bind="attr: {id: 'instrument' + ($index() + 1)}" name="instrument" type="radio" />
@@ -40,6 +47,12 @@
                                 </button>
                             </div>
                         </div>
+                    </div>
+
+                    <div class="error">
+                        <i class="material-icons">error</i>
+
+                        <p>Something went wrong! Please fix the errors or choose another payment instrument</p>
                     </div>
                 </div>
             </div>

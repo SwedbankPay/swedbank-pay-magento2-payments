@@ -46,6 +46,7 @@ define([
     'use strict';
 
     const hostedUrl = ko.observable('');
+    var paymentErrors = ko.observable([]);
 
     return Component.extend({
         defaults: {
@@ -58,6 +59,7 @@ define([
             }
         },
         hostedUrl: hostedUrl,
+        paymentErrors: paymentErrors,
         logoUrl: function () {
             return require.toUrl(this.config.data.logo);
         },
@@ -65,20 +67,22 @@ define([
             let self = this;
             self.totals = {};
             self.instrumentScript = '';
+            self.instrumentElement = {};
 
             self._super();
             Object.assign(this.config.data, window.checkoutConfig.SwedbankPay_Payments);
             Object.assign(this.config.data, window.checkoutConfig.SwedbankPay_Payments_Instrument_List);
 
-            // quote.totals.subscribe(function(totals) {
-            //     if (self.totals.grand_total !== totals.grand_total) {
-            //         if (self.getCode() == self.isChecked()) {
-            //             self.updatePaymentScript();
-            //         }
-            //     }
-            //
-            //     self.totals = totals;
-            // });
+
+            quote.totals.subscribe(function(totals) {
+                if (self.totals.grand_total !== totals.grand_total) {
+                    if (self.getCode() === self.isChecked()) {
+                        self.onPaymentInstrumentSelected(self.instrumentElement, null);
+                    }
+                }
+
+                self.totals = totals;
+            });
         },
         clearPaymentScript: function() {
             let self = this;
@@ -98,6 +102,7 @@ define([
 
             script.type = "text/javascript";
             script.id = "paymentMenuScript";
+            self.paymentErrors([]);
 
             $('.checkout-index-index').append(script);
 
@@ -154,6 +159,7 @@ define([
             let self = this;
             console.log(element.pretty_name + ' Payment Instrument Selected');
 
+            self.instrumentElement = element;
             self.startLoader();
 
             storage.get(
@@ -172,12 +178,11 @@ define([
                 }
             }).fail(function(message) {
                 console.error(message);
-                messageContainer.addErrorMessage({
-                    message: 'Something went wrong'
-                });
 
-                self.stopLoader();
-                window.location.reload();
+                var response = JSON.parse(message.responseJSON.result);
+
+                self.paymentErrors(response.problems);
+                self.showError();
             });
 
             return true;
@@ -210,13 +215,25 @@ define([
                 window.location.href = event.url;
             }
         },
+        getPaymentErrors: function () {
+            let self = this;
+
+            return self.paymentErrors();
+        },
         startLoader: function () {
             $('.payment-instrument-list .payment-instrument .view .content').hide();
             $('.payment-instrument-list .payment-instrument .view .spinner').show();
+            $('.payment-instrument-list .payment-instrument .view .error').hide();
         },
         stopLoader: function () {
             $('.payment-instrument-list .payment-instrument .view .content').show();
             $('.payment-instrument-list .payment-instrument .view .spinner').hide();
+            $('.payment-instrument-list .payment-instrument .view .error').hide();
+        },
+        showError: function () {
+            $('.payment-instrument-list .payment-instrument .view .error').show();
+            $('.payment-instrument-list .payment-instrument .view .spinner').hide();
+            $('.payment-instrument-list .payment-instrument .view .content').hide();
         }
     })
 });
