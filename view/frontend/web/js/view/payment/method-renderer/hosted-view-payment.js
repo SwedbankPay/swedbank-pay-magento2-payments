@@ -76,7 +76,7 @@ define([
 
             quote.totals.subscribe(function(totals) {
                 if (self.totals.grand_total !== totals.grand_total) {
-                    if (self.getCode() === self.isChecked()) {
+                    if (self.getCode() === self.isChecked() && Object.keys(self.instrumentElement).length !== 0) {
                         self.onPaymentInstrumentSelected(self.instrumentElement, null);
                     }
                 }
