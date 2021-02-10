@@ -17,13 +17,13 @@ jobs:
       run: git fetch --prune --unshallow
 
     - name: Install GitVersion
-      uses: gittools/actions/gitversion/setup@v0.9.2
+      uses: gittools/actions/gitversion/setup@v0.9.7
       with:
-        versionSpec: '5.2.x'
+        versionSpec: '5.x'
 
     - name: Execute GitVersion
       id: gitversion # step id used as reference for output values
-      uses: gittools/actions/gitversion/execute@v0.9.2
+      uses: gittools/actions/gitversion/execute@v0.9.7
 
     - name: PHP Setup
       uses: shivammathur/setup-php@v2
@@ -106,26 +106,22 @@ jobs:
     - name: PHPUnit
       run: ./vendor/bin/phpunit ./Test/Unit
 
-    - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
-      if: startsWith(github.ref, 'refs/tags/')
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Pre-release
+      uses: marvinpinto/action-automatic-releases@latest
+      if: startsWith(github.ref, 'refs/heads/master')
       with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
-        draft: false
-        prerelease: false
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        automatic_release_tag: latest
+        prerelease: true
+        title: Development Build
+        files: ${{ steps.archive.outputs.name }}
 
-    - name: Upload Release Asset
-      id: upload-release-asset
-      uses: actions/upload-release-asset@v1
+    - name: Upload to stable release
+      uses: svenstaro/upload-release-action@v1-release
       if: startsWith(github.ref, 'refs/tags/')
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ${{ steps.archive.outputs.name }}
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: ${{ steps.archive.outputs.name }}
         asset_name: ${{ steps.archive.outputs.name }}
-        asset_content_type: application/zip
+        tag: ${{ github.ref }}
+        overwrite: true
