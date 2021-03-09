@@ -13,20 +13,17 @@ use Magento\Sales\Api\Data\OrderInterface as MagentoOrderInterface;
 use Magento\Sales\Model\OrderRepository as MageOrderRepository;
 use SwedbankPay\Api\Service\Data\RequestInterface;
 use SwedbankPay\Api\Service\Resource\Data\ResponseInterface as ResponseResourceInterface;
-use SwedbankPay\Framework\AbstractDataTransferObject;
 use SwedbankPay\Core\Exception\ServiceException;
 use SwedbankPay\Core\Exception\SwedbankPayException;
 use SwedbankPay\Core\Logger\Logger;
 use SwedbankPay\Core\Model\Service as ClientRequestService;
+use SwedbankPay\Framework\AbstractDataTransferObject;
 use SwedbankPay\Payments\Api\Data\OrderInterface as PaymentOrderInterface;
 use SwedbankPay\Payments\Api\Data\QuoteInterface as PaymentQuoteInterface;
 use SwedbankPay\Payments\Api\OrderRepositoryInterface as PaymentOrderRepository;
 use SwedbankPay\Payments\Api\QuoteRepositoryInterface as PaymentQuoteRepository;
 
 /**
- * Class AbstractCommand
- *
- * @package SwedbankPay\Payments\Gateway\Command
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 abstract class AbstractCommand extends DataObject implements CommandInterface

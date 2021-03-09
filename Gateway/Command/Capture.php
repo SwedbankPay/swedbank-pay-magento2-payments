@@ -2,11 +2,16 @@
 
 namespace SwedbankPay\Payments\Gateway\Command;
 
-use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Exception\AlreadyExistsException;
+use Magento\Framework\Exception\InputException;
 use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Payment\Gateway\Command;
 use Magento\Quote\Model\QuoteRepository as MageQuoteRepository;
 use Magento\Sales\Model\Order as MageOrder;
 use Magento\Sales\Model\OrderRepository as MageOrderRepository;
+use SwedbankPay\Api\Client\Exception;
+use SwedbankPay\Core\Exception\ServiceException;
+use SwedbankPay\Core\Exception\SwedbankPayException;
 use SwedbankPay\Core\Helper\Order as OrderHelper;
 use SwedbankPay\Core\Logger\Logger;
 use SwedbankPay\Core\Model\Service as ClientRequestService;
@@ -17,9 +22,6 @@ use SwedbankPay\Payments\Helper\Service as ServiceHelper;
 use SwedbankPay\Payments\Helper\ServiceFactory;
 
 /**
- * Class Capture
- *
- * @package SwedbankPay\Payments\Gateway\Command
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class Capture extends AbstractCommand
@@ -77,11 +79,14 @@ class Capture extends AbstractCommand
      *
      * @param array $commandSubject
      *
-     * @return void
+     * @return Command\ResultInterface|null
+     *
+     * @throws AlreadyExistsException
+     * @throws Exception
+     * @throws InputException
      * @throws NoSuchEntityException
-     * @throws \SwedbankPay\Core\Exception\ServiceException
-     * @throws \SwedbankPay\Api\Client\Exception
-     * @throws LocalizedException
+     * @throws ServiceException
+     * @throws SwedbankPayException
      */
     public function execute(array $commandSubject)
     {

@@ -23,8 +23,6 @@ use SwedbankPay\Payments\Helper\Service as ServiceHelper;
 use SwedbankPay\Payments\Helper\ServiceFactory;
 
 /**
- * Class Complete
- *
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class Complete extends PaymentActionAbstract implements CsrfAwareActionInterface

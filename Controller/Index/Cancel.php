@@ -18,8 +18,6 @@ use SwedbankPay\Payments\Api\QuoteRepositoryInterface as SwedbankQuoteRepository
 use SwedbankPay\Payments\Helper\Config as ConfigHelper;
 
 /**
- * Class Cancel
- *
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class Cancel extends PaymentActionAbstract implements CsrfAwareActionInterface

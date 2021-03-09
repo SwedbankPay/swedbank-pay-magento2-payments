@@ -260,7 +260,6 @@ class Service
         return $lastTransaction;
     }
 
-
     /**
      * @return PaymentObjectInterface|null
      */

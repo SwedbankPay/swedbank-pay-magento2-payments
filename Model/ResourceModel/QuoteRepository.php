@@ -16,8 +16,6 @@ use SwedbankPay\Payments\Model\ResourceModel\Quote\Collection as QuoteCollection
 use SwedbankPay\Payments\Model\ResourceModel\Quote\CollectionFactory as QuoteCollectionFactory;
 
 /**
- * Class QuoteRepository
- *
  * @SuppressWarnings(PHPMD.LongVariable)
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */

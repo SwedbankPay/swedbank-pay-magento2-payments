@@ -17,11 +17,6 @@ use SwedbankPay\Payments\Api\QuoteRepositoryInterface as PaymentQuoteRepository;
 use SwedbankPay\Payments\Helper\Config as PaymentsConfig;
 use SwedbankPay\Payments\Helper\PaymentData;
 
-/**
- * Class Initialize
- *
- * @package SwedbankPay\Checkout\Gateway\Command
- */
 class Initialize extends AbstractCommand
 {
     const TYPE_AUTH = 'authorization';

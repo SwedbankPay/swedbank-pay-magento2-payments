@@ -2,6 +2,8 @@
 
 namespace SwedbankPay\Payments\Gateway\Command;
 
+use Magento\Framework\Exception\AlreadyExistsException;
+use Magento\Framework\Exception\InputException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Pricing\PriceCurrencyInterface;
 use Magento\Payment\Gateway\Command;
@@ -22,9 +24,6 @@ use SwedbankPay\Payments\Helper\Service as ServiceHelper;
 use SwedbankPay\Payments\Helper\ServiceFactory;
 
 /**
- * Class Cancel
- *
- * @package SwedbankPay\Payments\Gateway\Command
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class Cancel extends AbstractCommand
@@ -82,11 +81,14 @@ class Cancel extends AbstractCommand
      *
      * @param array $commandSubject
      *
-     * @return null|Command\ResultInterface
-     * @throws NoSuchEntityException
-     * @throws SwedbankPayException
-     * @throws ServiceException
+     * @return Command\ResultInterface|null
+     *
+     * @throws AlreadyExistsException
      * @throws Exception
+     * @throws InputException
+     * @throws NoSuchEntityException
+     * @throws ServiceException
+     * @throws SwedbankPayException
      */
     public function execute(array $commandSubject)
     {

@@ -19,10 +19,10 @@ use SwedbankPay\Payments\Helper\Factory\InstrumentFactory;
 use SwedbankPay\Payments\Helper\PaymentData as PaymentDataHelper;
 use SwedbankPay\Payments\Helper\Service as ServiceHelper;
 use SwedbankPay\Payments\Helper\ServiceFactory;
+use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Framework\Exception\LocalizedException;
 
 /**
- * Class OnInstrumentSelected
- *
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class OnInstrumentSelected extends PaymentActionAbstract
@@ -90,7 +90,9 @@ class OnInstrumentSelected extends PaymentActionAbstract
     }
 
     /**
-     * @return Json|ResultInterface|ResponseInterface
+     * @return ResponseInterface|Json|ResultInterface
+     * @throws LocalizedException
+     * @throws NoSuchEntityException
      */
     public function execute()
     {

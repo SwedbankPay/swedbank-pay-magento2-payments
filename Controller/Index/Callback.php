@@ -32,8 +32,6 @@ use SwedbankPay\Payments\Helper\ServiceFactory;
 use SwedbankPay\Payments\Model\ResourceModel\OrderRepository;
 
 /**
- * Class Callback
- *
  * @SuppressWarnings(PHPMD.CyclomaticComplexity)
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
