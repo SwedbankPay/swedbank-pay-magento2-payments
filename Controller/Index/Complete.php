@@ -11,11 +11,16 @@ use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Event\Manager as EventManager;
 use Magento\Framework\UrlInterface;
 use Magento\Sales\Model\Order;
+use SwedbankPay\Api\Service\Payment\Resource\Response\Data\PaymentObjectInterface;
 use SwedbankPay\Core\Exception\ServiceException;
 use SwedbankPay\Core\Logger\Logger;
+use SwedbankPay\Payments\Api\Data\OrderInterface;
+use SwedbankPay\Payments\Api\Data\QuoteInterface;
 use SwedbankPay\Payments\Api\OrderRepositoryInterface as SwedbankOrderRepository;
 use SwedbankPay\Payments\Helper\Config as ConfigHelper;
+use SwedbankPay\Payments\Helper\PaymentData as PaymentDataHelper;
 use SwedbankPay\Payments\Helper\Service as ServiceHelper;
+use SwedbankPay\Payments\Helper\ServiceFactory;
 
 /**
  * Class Complete
@@ -35,9 +40,14 @@ class Complete extends PaymentActionAbstract implements CsrfAwareActionInterface
     protected $swedbankPayOrderRepo;
 
     /**
-     * @var ServiceHelper
+     * @var ServiceFactory
      */
-    protected $serviceHelper;
+    protected $serviceFactory;
+
+    /**
+     * @var PaymentDataHelper
+     */
+    protected $paymentDataHelper;
 
     /**
      * @var UrlInterface
@@ -51,10 +61,11 @@ class Complete extends PaymentActionAbstract implements CsrfAwareActionInterface
      * @param EventManager $eventManager
      * @param ConfigHelper $configHelper
      * @param Logger $logger
-     * @param UrlInterface $urlInterface
      * @param CheckoutSession $checkoutSession
      * @param SwedbankOrderRepository $swedbankPayOrderRepo
-     * @param ServiceHelper $serviceHelper
+     * @param ServiceFactory $serviceFactory
+     * @param PaymentDataHelper $paymentDataHelper
+     * @param UrlInterface $urlInterface
      */
     public function __construct(
         Context $context,
@@ -64,14 +75,16 @@ class Complete extends PaymentActionAbstract implements CsrfAwareActionInterface
         Logger $logger,
         CheckoutSession $checkoutSession,
         SwedbankOrderRepository $swedbankPayOrderRepo,
-        ServiceHelper $serviceHelper,
+        ServiceFactory $serviceFactory,
+        PaymentDataHelper $paymentDataHelper,
         UrlInterface $urlInterface
     ) {
         parent::__construct($context, $resultJsonFactory, $eventManager, $configHelper, $logger);
 
         $this->checkoutSession = $checkoutSession;
         $this->swedbankPayOrderRepo = $swedbankPayOrderRepo;
-        $this->serviceHelper = $serviceHelper;
+        $this->serviceFactory = $serviceFactory;
+        $this->paymentDataHelper = $paymentDataHelper;
         $this->urlInterface = $urlInterface;
 
         $this->setEventName('complete');
@@ -98,23 +111,32 @@ class Complete extends PaymentActionAbstract implements CsrfAwareActionInterface
 
         $swedbankPayOrder = $this->swedbankPayOrderRepo->getByOrderId($order->getEntityId());
 
-        $paymentData = $this->serviceHelper->getPaymentData($swedbankPayOrder->getPaymentIdPath());
+        /** @var ServiceHelper $serviceHelper */
+        $serviceHelper = $this->serviceFactory->create();
 
-        switch ($paymentData->getState()) {
+        $paymentResponseResource = $serviceHelper
+            ->currentPayment(
+                $swedbankPayOrder->getInstrument(),
+                $swedbankPayOrder->getPaymentIdPath(),
+                ['transactions']
+            )
+            ->getPaymentResponseResource();
+
+        $this->updateIntent($swedbankPayOrder, $paymentResponseResource);
+
+        switch ($swedbankPayOrder->getState()) {
             case 'Failed':
                 $this->cancelOrder($order);
                 break;
             default:
-                $lastTransactionData = $this->serviceHelper->getLastTransactionData(
-                    $swedbankPayOrder->getPaymentIdPath() . '/transactions'
-                );
+                $lastTransactionData = $serviceHelper->getLastTransaction();
 
                 if ($lastTransactionData->getState() != 'Completed') {
                     $this->logger->debug(
                         sprintf(
                             'Order ID %s has Payment State \'%s\' but Transaction State \'%s\'',
                             $order->getEntityId(),
-                            $paymentData->getState(),
+                            $swedbankPayOrder->getState(),
                             $lastTransactionData->getState()
                         )
                     );
@@ -127,7 +149,7 @@ class Complete extends PaymentActionAbstract implements CsrfAwareActionInterface
                     sprintf(
                         'Order ID %s has Payment State \'%s\'',
                         $order->getEntityId(),
-                        $paymentData->getState()
+                        $swedbankPayOrder->getState()
                     )
                 );
 
@@ -135,6 +157,19 @@ class Complete extends PaymentActionAbstract implements CsrfAwareActionInterface
                 $this->setRedirect($url);
                 break;
         }
+    }
+
+    /**
+     * @param QuoteInterface|OrderInterface $paymentData
+     * @param PaymentObjectInterface $paymentResponseResource
+     */
+    public function updateIntent($paymentData, $paymentResponseResource)
+    {
+        $paymentData->setIntent($paymentResponseResource->getPayment()->getIntent());
+        $paymentData->setState($paymentResponseResource->getPayment()->getState());
+        $paymentData->setAmount($paymentResponseResource->getPayment()->getAmount());
+
+        $this->paymentDataHelper->update($paymentData);
     }
 
     /**

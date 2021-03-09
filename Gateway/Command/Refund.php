@@ -18,6 +18,7 @@ use SwedbankPay\Payments\Api\OrderRepositoryInterface as PaymentOrderRepository;
 use SwedbankPay\Payments\Api\QuoteRepositoryInterface as PaymentQuoteRepository;
 use SwedbankPay\Payments\Helper\PaymentData;
 use SwedbankPay\Payments\Helper\Service as ServiceHelper;
+use SwedbankPay\Payments\Helper\ServiceFactory;
 
 /**
  * Class Refund
@@ -33,9 +34,9 @@ class Refund extends AbstractCommand
     protected $paymentData;
 
     /**
-     * @var ServiceHelper
+     * @var ServiceFactory
      */
-    protected $serviceHelper;
+    protected $serviceFactory;
 
     /**
      * Refund constructor.
@@ -45,7 +46,7 @@ class Refund extends AbstractCommand
      * @param ClientRequestService $requestService
      * @param MageQuoteRepository $mageQuoteRepo
      * @param MageOrderRepository $mageOrderRepo
-     * @param ServiceHelper $serviceHelper
+     * @param ServiceFactory $serviceFactory
      * @param PaymentData $paymentData
      * @param Logger $logger
      * @param array $data
@@ -56,7 +57,7 @@ class Refund extends AbstractCommand
         ClientRequestService $requestService,
         MageQuoteRepository $mageQuoteRepo,
         MageOrderRepository $mageOrderRepo,
-        ServiceHelper $serviceHelper,
+        ServiceFactory $serviceFactory,
         PaymentData $paymentData,
         Logger $logger,
         array $data = []
@@ -72,7 +73,7 @@ class Refund extends AbstractCommand
         );
 
         $this->paymentData = $paymentData;
-        $this->serviceHelper = $serviceHelper;
+        $this->serviceFactory = $serviceFactory;
     }
 
     /**
@@ -103,7 +104,9 @@ class Refund extends AbstractCommand
 
         $this->checkRemainingAmount('refund', $amount, $order, $swedbankPayOrder);
 
-        $reversalResponse = $this->serviceHelper->refund($swedbankPayOrder->getInstrument(), $swedbankPayOrder);
+        /** @var ServiceHelper $serviceHelper */
+        $serviceHelper = $this->serviceFactory->create();
+        $reversalResponse = $serviceHelper->refund($swedbankPayOrder->getInstrument(), $swedbankPayOrder);
 
         $this->checkResponseResource('refund', $reversalResponse->getResponseResource(), $order, $swedbankPayOrder);
 

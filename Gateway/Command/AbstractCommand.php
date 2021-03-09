@@ -264,7 +264,9 @@ abstract class AbstractCommand extends DataObject implements CommandInterface
         // phpcs:ignore Magento2.Functions.DiscouragedFunction
         $remainingAmount = (int)call_user_func([$swedbankPayOrder, $getMethod]);
 
-        if ($remainingAmount >= (int) round($amount * 100)) {
+        $amountInSubUnit = (int) round($amount * 100);
+
+        if ($remainingAmount >= $amountInSubUnit) {
             return;
         }
 
@@ -275,7 +277,7 @@ abstract class AbstractCommand extends DataObject implements CommandInterface
                 $command,
                 $mageOrder->getEntityId(),
                 $swedbankPayOrder->getPaymentId(),
-                $amount,
+                $amountInSubUnit,
                 $remainingAmount
             )
         );
@@ -285,7 +287,7 @@ abstract class AbstractCommand extends DataObject implements CommandInterface
                 sprintf(
                     "SwedbankPay %s Error: The amount of %s exceeds the remaining %s.",
                     ucfirst($command),
-                    $amount,
+                    $amountInSubUnit,
                     $remainingAmount
                 )
             )

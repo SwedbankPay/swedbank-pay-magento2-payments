@@ -14,6 +14,7 @@ use SwedbankPay\Payments\Api\OrderRepositoryInterface as PaymentOrderRepository;
 use SwedbankPay\Payments\Api\QuoteRepositoryInterface as PaymentQuoteRepository;
 use SwedbankPay\Payments\Helper\PaymentData;
 use SwedbankPay\Payments\Helper\Service as ServiceHelper;
+use SwedbankPay\Payments\Helper\ServiceFactory;
 
 /**
  * Class Capture
@@ -29,9 +30,9 @@ class Capture extends AbstractCommand
     protected $paymentData;
 
     /**
-     * @var ServiceHelper
+     * @var ServiceFactory
      */
-    protected $serviceHelper;
+    protected $serviceFactory;
 
     /**
      * Capture constructor.
@@ -42,7 +43,7 @@ class Capture extends AbstractCommand
      * @param MageQuoteRepository $mageQuoteRepo
      * @param MageOrderRepository $mageOrderRepo
      * @param PaymentData $paymentData
-     * @param ServiceHelper $serviceHelper
+     * @param ServiceFactory $serviceFactory
      * @param Logger $logger
      * @param array $data
      */
@@ -53,7 +54,7 @@ class Capture extends AbstractCommand
         MageQuoteRepository $mageQuoteRepo,
         MageOrderRepository $mageOrderRepo,
         PaymentData $paymentData,
-        ServiceHelper $serviceHelper,
+        ServiceFactory $serviceFactory,
         Logger $logger,
         array $data = []
     ) {
@@ -68,7 +69,7 @@ class Capture extends AbstractCommand
         );
 
         $this->paymentData = $paymentData;
-        $this->serviceHelper = $serviceHelper;
+        $this->serviceFactory = $serviceFactory;
     }
 
     /**
@@ -105,7 +106,9 @@ class Capture extends AbstractCommand
             return null;
         }
 
-        $captureResponse = $this->serviceHelper->capture($swedbankPayOrder->getInstrument(), $swedbankPayOrder, $order);
+        /** @var ServiceHelper $serviceHelper */
+        $serviceHelper = $this->serviceFactory->create();
+        $captureResponse = $serviceHelper->capture($swedbankPayOrder->getInstrument(), $swedbankPayOrder, $order);
 
         $this->checkResponseResource('capture', $captureResponse->getResponseResource(), $order, $swedbankPayOrder);
 

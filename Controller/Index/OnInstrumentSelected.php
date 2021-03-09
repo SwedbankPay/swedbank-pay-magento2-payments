@@ -18,6 +18,7 @@ use SwedbankPay\Payments\Helper\Config as ConfigHelper;
 use SwedbankPay\Payments\Helper\Factory\InstrumentFactory;
 use SwedbankPay\Payments\Helper\PaymentData as PaymentDataHelper;
 use SwedbankPay\Payments\Helper\Service as ServiceHelper;
+use SwedbankPay\Payments\Helper\ServiceFactory;
 
 /**
  * Class OnInstrumentSelected
@@ -32,9 +33,9 @@ class OnInstrumentSelected extends PaymentActionAbstract
     protected $httpRequest;
 
     /**
-     * @var ServiceHelper
+     * @var ServiceFactory
      */
-    protected $serviceHelper;
+    protected $serviceFactory;
 
     /**
      * @var PaymentDataHelper
@@ -53,13 +54,14 @@ class OnInstrumentSelected extends PaymentActionAbstract
 
     /**
      * OnInstrumentSelected constructor.
+     *
      * @param Context $context
      * @param JsonFactory $resultJsonFactory
      * @param EventManager $eventManager
      * @param ConfigHelper $configHelper
      * @param Logger $logger
      * @param HttpRequest $httpRequest
-     * @param ServiceHelper $serviceHelper
+     * @param ServiceFactory $serviceFactory
      * @param PaymentDataHelper $paymentDataHelper
      * @param InstrumentFactory $instrumentFactory
      * @param StoreManagerInterface $storeManager
@@ -73,7 +75,7 @@ class OnInstrumentSelected extends PaymentActionAbstract
         ConfigHelper $configHelper,
         Logger $logger,
         HttpRequest $httpRequest,
-        ServiceHelper $serviceHelper,
+        ServiceFactory $serviceFactory,
         PaymentDataHelper $paymentDataHelper,
         InstrumentFactory $instrumentFactory,
         StoreManagerInterface $storeManager
@@ -81,7 +83,7 @@ class OnInstrumentSelected extends PaymentActionAbstract
         parent::__construct($context, $resultJsonFactory, $eventManager, $configHelper, $logger);
 
         $this->httpRequest = $httpRequest;
-        $this->serviceHelper = $serviceHelper;
+        $this->serviceFactory = $serviceFactory;
         $this->paymentDataHelper = $paymentDataHelper;
         $this->instrumentFactory = $instrumentFactory;
         $this->storeManager = $storeManager;
@@ -111,8 +113,11 @@ class OnInstrumentSelected extends PaymentActionAbstract
             return $this->setResult('Instrument not found', 400);
         }
 
+        /** @var ServiceHelper $serviceHelper */
+        $serviceHelper = $this->serviceFactory->create();
+
         try {
-            $responseService = $this->serviceHelper->payment($instrument);
+            $responseService = $serviceHelper->payment($instrument);
         } catch (ClientException $e) {
             return $this->setResult($e->getMessage(), 400);
         } catch (ServiceException $e) {

@@ -19,6 +19,7 @@ use SwedbankPay\Payments\Api\OrderRepositoryInterface as PaymentOrderRepository;
 use SwedbankPay\Payments\Api\QuoteRepositoryInterface as PaymentQuoteRepository;
 use SwedbankPay\Payments\Helper\PaymentData;
 use SwedbankPay\Payments\Helper\Service as ServiceHelper;
+use SwedbankPay\Payments\Helper\ServiceFactory;
 
 /**
  * Class Cancel
@@ -34,9 +35,9 @@ class Cancel extends AbstractCommand
     protected $paymentData;
 
     /**
-     * @var ServiceHelper
+     * @var ServiceFactory
      */
-    protected $serviceHelper;
+    protected $serviceFactory;
 
     /**
      * Cancel constructor.
@@ -46,7 +47,7 @@ class Cancel extends AbstractCommand
      * @param ClientRequestService $requestService
      * @param MageQuoteRepository $mageQuoteRepo
      * @param MageOrderRepository $mageOrderRepo
-     * @param ServiceHelper $serviceHelper
+     * @param ServiceFactory $serviceFactory
      * @param PaymentData $paymentData
      * @param Logger $logger
      * @param array $data
@@ -57,7 +58,7 @@ class Cancel extends AbstractCommand
         ClientRequestService $requestService,
         MageQuoteRepository $mageQuoteRepo,
         MageOrderRepository $mageOrderRepo,
-        ServiceHelper $serviceHelper,
+        ServiceFactory $serviceFactory,
         PaymentData $paymentData,
         Logger $logger,
         array $data = []
@@ -73,7 +74,7 @@ class Cancel extends AbstractCommand
         );
 
         $this->paymentData = $paymentData;
-        $this->serviceHelper = $serviceHelper;
+        $this->serviceFactory = $serviceFactory;
     }
 
     /**
@@ -110,7 +111,9 @@ class Cancel extends AbstractCommand
 
         $this->checkRemainingAmount('cancel', $amount, $order, $swedbankPayOrder);
 
-        $cancelResponse = $this->serviceHelper->cancel($swedbankPayOrder->getInstrument(), $swedbankPayOrder);
+        /** @var ServiceHelper $serviceHelper */
+        $serviceHelper = $this->serviceFactory->create();
+        $cancelResponse = $serviceHelper->cancel($swedbankPayOrder->getInstrument(), $swedbankPayOrder);
 
         $this->checkResponseResource('cancel', $cancelResponse->getResponseResource(), $order, $swedbankPayOrder);
 

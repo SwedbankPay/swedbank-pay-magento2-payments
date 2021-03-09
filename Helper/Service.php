@@ -2,29 +2,27 @@
 
 namespace SwedbankPay\Payments\Helper;
 
-use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Sales\Model\Order;
 use SwedbankPay\Api\Client\Exception as ClientException;
 use SwedbankPay\Api\Service\Data\ResponseInterface as ResponseServiceInterface;
-use SwedbankPay\Api\Service\Payment\Transaction\Resource\Collection\Item\TransactionListItem;
-use SwedbankPay\Api\Service\Payment\Transaction\Resource\Collection\TransactionListCollection;
+use SwedbankPay\Api\Service\Payment\Resource\Response\Data\PaymentObjectInterface;
+use SwedbankPay\Api\Service\Payment\Resource\Response\Data\PaymentResponseInterface;
 use SwedbankPay\Api\Service\Payment\Transaction\Resource\Response\Data\TransactionInterface;
-use SwedbankPay\Api\Service\Payment\Transaction\Resource\Response\Data\TransactionsInterface;
-use SwedbankPay\Api\Service\Payment\Transaction\Resource\Response\Data\TransactionObjectInterface;
-use SwedbankPay\Api\Service\Payment\Transaction\Resource\Response\Data\TransactionsObjectInterface;
 use SwedbankPay\Api\Service\Paymentorder\Request\GetCurrentPayment;
-use SwedbankPay\Api\Service\Paymentorder\Resource\Response\Data\GetCurrentPaymentInterface;
-use SwedbankPay\Api\Service\Request;
 use SwedbankPay\Core\Exception\ServiceException;
 use SwedbankPay\Core\Logger\Logger;
 use SwedbankPay\Core\Model\Service as ClientRequestService;
 use SwedbankPay\Payments\Api\Data\OrderInterface;
-use SwedbankPay\Payments\Api\Data\QuoteInterface;
 use SwedbankPay\Payments\Helper\Factory\InstrumentFactory;
 use SwedbankPay\Payments\Model\Instrument\Collector\InstrumentCollector;
 
 class Service
 {
+    /**
+     * @var PaymentObjectInterface|null
+     */
+    private $paymentResponseResource = null;
+
     /**
      * @var ClientRequestService
      */
@@ -41,11 +39,6 @@ class Service
     protected $instrumentFactory;
 
     /**
-     * @var PaymentData
-     */
-    protected $paymentDataHelper;
-
-    /**
      * @var Logger
      */
     protected $logger;
@@ -55,20 +48,17 @@ class Service
      * @param ClientRequestService $requestService
      * @param InstrumentCollector $instrumentCollector
      * @param InstrumentFactory $instrumentFactory
-     * @param PaymentData $paymentDataHelper
      * @param Logger $logger
      */
     public function __construct(
         ClientRequestService $requestService,
         InstrumentCollector $instrumentCollector,
         InstrumentFactory $instrumentFactory,
-        PaymentData $paymentDataHelper,
         Logger $logger
     ) {
         $this->requestService = $requestService;
         $this->instrumentCollector = $instrumentCollector;
         $this->instrumentFactory = $instrumentFactory;
-        $this->paymentDataHelper = $paymentDataHelper;
         $this->logger = $logger;
     }
 
@@ -110,12 +100,12 @@ class Service
         $paymentInstrument = $this->instrumentFactory->create($instrument);
         $transactionObject = $paymentInstrument->createCaptureTransactionObject($swedbankPayOrder, $order);
 
-        $captureRequest = $this->requestService->init($instrument . '/Transaction', 'CreateCapture');
-        $captureRequest->setRequestEndpointVars($swedbankPayOrder->getPaymentId());
-        $captureRequest->setRequestResource($transactionObject);
+        $request = $this->requestService->init($instrument . '/Transaction', 'CreateCapture');
+        $request->setPaymentId($swedbankPayOrder->getPaymentIdPath());
+        $request->setRequestResource($transactionObject);
 
         /** @var ResponseServiceInterface $responseService */
-        $responseService = $captureRequest->send();
+        $responseService = $request->send();
 
         $response = $responseService->getResponseData();
 
@@ -137,12 +127,12 @@ class Service
         $paymentInstrument = $this->instrumentFactory->create($instrument);
         $transactionObject = $paymentInstrument->createRefundTransactionObject($swedbankPayOrder);
 
-        $captureRequest = $this->requestService->init($instrument . '/Transaction', 'CreateReversal');
-        $captureRequest->setRequestEndpointVars($swedbankPayOrder->getPaymentId());
-        $captureRequest->setRequestResource($transactionObject);
+        $request = $this->requestService->init($instrument . '/Transaction', 'CreateReversal');
+        $request->setPaymentId($swedbankPayOrder->getPaymentIdPath());
+        $request->setRequestResource($transactionObject);
 
         /** @var ResponseServiceInterface $responseService */
-        $responseService = $captureRequest->send();
+        $responseService = $request->send();
 
         $response = $responseService->getResponseData();
 
@@ -164,12 +154,12 @@ class Service
         $paymentInstrument = $this->instrumentFactory->create($instrument);
         $transactionObject = $paymentInstrument->createCancelTransactionObject($swedbankPayOrder);
 
-        $captureRequest = $this->requestService->init($instrument . '/Transaction', 'CreateCancellation');
-        $captureRequest->setRequestEndpointVars($swedbankPayOrder->getPaymentId());
-        $captureRequest->setRequestResource($transactionObject);
+        $request = $this->requestService->init($instrument . '/Transaction', 'CreateCancellation');
+        $request->setPaymentId($swedbankPayOrder->getPaymentIdPath());
+        $request->setRequestResource($transactionObject);
 
         /** @var ResponseServiceInterface $responseService */
-        $responseService = $captureRequest->send();
+        $responseService = $request->send();
 
         $response = $responseService->getResponseData();
 
@@ -179,38 +169,29 @@ class Service
     }
 
     /**
+     * @param string $instrument
      * @param string $paymentUri
-     * @return OrderInterface|QuoteInterface|bool
+     * @param array $expands
+     * @return $this
      * @throws ClientException
      * @throws ServiceException
-     * @throws NoSuchEntityException
-     *
-     * @SuppressWarnings(PHPMD.LongVariable)
      */
-    public function getPaymentData($paymentUri)
+    public function currentPayment($instrument, $paymentUri, $expands = [])
     {
-        /**
-         * $paymentParams[0] Payment URI
-         * $paymentParams[1] Payment Instrument
-         * $paymentParams[2] Payment ID
-         */
-        $validUri = preg_match('|/psp/([^/]+)/payments/([^/]+)|', $paymentUri, $paymentParams);
-        if (!$validUri) {
-            return false;
-        }
-
-        list($paymentUri, $instrument, $paymentId) = $paymentParams;
-
         $instrument = $this->getInstrument($instrument);
-
-        $paymentData = $this->paymentDataHelper->getByPaymentId($paymentId);
 
         /** @var GetCurrentPayment $serviceRequest */
         $serviceRequest = $this->requestService->init(ucfirst($instrument), 'GetPayment');
-        $serviceRequest->setRequestEndpoint($paymentUri);
+        $serviceRequest->setPaymentId($paymentUri);
 
-        /** @var GetCurrentPaymentInterface $currentPayment */
+        if ($expands) {
+            $serviceRequest->setExpands(['transactions']);
+        }
+
+        /** @var ResponseServiceInterface $responseService */
         $currentPaymentResponse = $serviceRequest->send();
+
+        /** @var PaymentObjectInterface $currentPayment */
         $currentPayment = $currentPaymentResponse->getResponseResource();
 
         $this->logger->debug(
@@ -220,109 +201,55 @@ class Service
             )
         );
 
-        $paymentData->setIntent($currentPayment->getPayment()->getIntent());
-        $paymentData->setState($currentPayment->getPayment()->getState());
-        $paymentData->setAmount($currentPayment->getPayment()->getAmount());
-        $this->paymentDataHelper->update($paymentData);
+        $this->setPaymentResponseResource($currentPayment);
 
-        return $paymentData;
+        return $this;
     }
 
     /**
-     * @param string $transactionUri
-     * @param string $paymentUri
-     * @return TransactionInterface|false
-     * @throws ClientException
-     * @throws NoSuchEntityException
-     * @throws ServiceException
-     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
-     * @SuppressWarnings(PHPMD.UnusedLocalVariable)
+     * @param string $transactionNumber
+     * @return TransactionInterface|null
      */
-    public function getTransactionData($transactionUri, $paymentUri)
+    public function getTransaction($transactionNumber)
     {
-        /**
-         * $transactionParams[0] Transaction URI
-         * $transactionParams[1] Payment Instrument
-         * $transactionParams[2] Payment Resource ID
-         * $transactionParams[3] Transaction Type
-         * $transactionParams[4] Transaction ID
-         */
-        $validUri = preg_match('|/psp/([^/]+)/payments/([^/]+)/([^/]+)/([^/]+)|', $transactionUri, $transactionParams);
-        if (!$validUri) {
-            return false;
+        if (!$this->getPaymentResponseResource()) {
+            return null;
         }
 
-        /** @noinspection PhpUnusedLocalVariableInspection */
-        list($transactionUri, $instrument, $paymentId, $transactionType, $transactionId) = $transactionParams;
-        $paymentData = $this->paymentDataHelper->getByPaymentIdPath($paymentUri);
+        /** @var PaymentResponseInterface $paymentResponse */
+        $paymentResponse = $this->getPaymentResponseResource()->getPayment();
 
-        $instrument = $this->getInstrument($paymentData->getInstrument());
+        /** @var TransactionInterface[] $transactions */
+        $transactions = $paymentResponse->getTransactions()->getTransactionList()->getItems();
 
-        /** @var Request $serviceRequest */
-        $serviceRequest = $this->requestService->init(ucfirst($instrument) . '/Transaction', 'GetTransaction');
-        $serviceRequest->setRequestEndpointVars($paymentId, $transactionId);
+        foreach ($transactions as $transaction) {
+            if ($transaction->getNumber() == $transactionNumber) {
+                return $transaction;
+            }
+        }
 
-        /** @var TransactionObjectInterface $transactionObject */
-        $transactionResponse = $serviceRequest->send();
-        $transactionObject = $transactionResponse->getResponseResource();
-
-        $this->logger->debug(
-            sprintf(
-                'Current Transaction Response: \'%s\'',
-                json_encode($transactionResponse->getResponseData())
-            )
-        );
-
-        return $transactionObject->getTransaction();
+        return null;
     }
 
     /**
-     * @param string $transactionUri
-     * @return TransactionInterface|false
-     * @throws ClientException
-     * @throws ServiceException
-     *
-     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
-     * @SuppressWarnings(PHPMD.UnusedLocalVariable)
+     * @return TransactionInterface|null
      */
-    public function getLastTransactionData($transactionUri)
+    public function getLastTransaction()
     {
-        /**
-         * $transactionParams[0] Transaction URI
-         * $transactionParams[1] Payment Instrument
-         * $transactionParams[2] Payment Resource ID
-         * $transactionParams[3] Transaction Type
-         */
-        $validUri = preg_match('|/psp/([^/]+)/payments/([^/]+)/([^/]+)|', $transactionUri, $transactionParams);
-        if (!$validUri) {
-            return false;
+        if (!$this->getPaymentResponseResource()) {
+            return null;
         }
 
-        /** @noinspection PhpUnusedLocalVariableInspection */
-        list($transactionUri, $instrument, $resourceId, $transactionType) = $transactionParams;
+        /** @var PaymentResponseInterface $paymentResponse */
+        $paymentResponse = $this->getPaymentResponseResource()->getPayment();
 
-        $instrument = $this->getInstrument($instrument);
+        /** @var TransactionInterface[] $transactions */
+        $transactions = $paymentResponse->getTransactions()->getTransactionList()->getItems();
 
-        /** @var Request $serviceRequest */
-        $serviceRequest = $this->requestService->init(ucfirst($instrument) . '/Transaction', 'GetTransactions');
-        $serviceRequest->setRequestEndpoint($transactionUri);
-
-        /** @var TransactionsObjectInterface $transactionsObject */
-        $transactionResponse = $serviceRequest->send();
-
-        $transactionsObject = $transactionResponse->getResponseResource();
-
-        /** @var TransactionsInterface $transactions */
-        $transactions = $transactionsObject->getTransactions();
-
-        /** @var TransactionListCollection $transactionList */
-        $transactionList = $transactions->getTransactionList();
-
-        /** @var TransactionListItem $lastTransaction */
+        /** @var TransactionInterface $lastTransaction */
         $lastTransaction = null;
 
-        /** @var TransactionListItem $transaction */
-        foreach ($transactionList->getItems() as $transaction) {
+        foreach ($transactions as $transaction) {
             if (!$lastTransaction) {
                 $lastTransaction = $transaction;
             } elseif (strtotime($lastTransaction->getCreated()) < strtotime($transaction->getCreated())) {
@@ -331,6 +258,26 @@ class Service
         }
 
         return $lastTransaction;
+    }
+
+
+    /**
+     * @return PaymentObjectInterface|null
+     */
+    public function getPaymentResponseResource()
+    {
+        return $this->paymentResponseResource;
+    }
+
+    /**
+     * @param PaymentObjectInterface $paymentResponseResource
+     * @return $this
+     */
+    public function setPaymentResponseResource($paymentResponseResource)
+    {
+        $this->paymentResponseResource = $paymentResponseResource;
+
+        return $this;
     }
 
     /**
