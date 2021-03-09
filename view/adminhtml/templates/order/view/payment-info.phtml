@@ -2,8 +2,15 @@
 /** @var \SwedbankPay\Payments\Block\Adminhtml\Order\View\PaymentInfo $block */
 ?>
 
+<?php if ($block->getSwedbankPayOrder()): ?>
 <br />
 <p>
+    <?php if ($block->getCurrentPaymentIdPath()): ?>
     <strong>SwedbankPay Payment ID:</strong> <?= $block->escapeHtml($block->getCurrentPaymentIdPath()); ?><br />
+    <?php endif; ?>
+
+    <?php if ($block->getCurrentPaymentInstrument()): ?>
     <strong>SwedbankPay Payment Instrument:</strong> <?= $block->escapeHtml(ucfirst($block->getCurrentPaymentInstrument())); ?>
+    <?php endif; ?>
 </p>
+<?php endif; ?>

@@ -12,6 +12,11 @@ use SwedbankPay\Payments\Api\OrderRepositoryInterface;
 class PaymentInfo extends Template
 {
     /**
+     * @var OrderInterface
+     */
+    protected $swedbankPayOrder = null;
+
+    /**
      * @var Service
      */
     protected $service;
@@ -41,7 +46,6 @@ class PaymentInfo extends Template
 
     /**
      * @return string
-     * @throws NoSuchEntityException
      */
     public function getCurrentPaymentInstrument()
     {
@@ -52,7 +56,6 @@ class PaymentInfo extends Template
 
     /**
      * @return string
-     * @throws NoSuchEntityException
      */
     public function getCurrentPaymentId()
     {
@@ -63,7 +66,6 @@ class PaymentInfo extends Template
 
     /**
      * @return string
-     * @throws NoSuchEntityException
      */
     public function getCurrentPaymentIdPath()
     {
@@ -74,12 +76,29 @@ class PaymentInfo extends Template
 
     /**
      * @return OrderInterface
-     * @throws NoSuchEntityException
      */
-    protected function getSwedbankPayOrder()
+    public function getSwedbankPayOrder()
+    {
+        if (!$this->swedbankPayOrder) {
+            $this->swedbankPayOrder = $this->loadSwedbankPayOrder();
+        }
+
+        return $this->swedbankPayOrder;
+    }
+
+    /**
+     * @return OrderInterface|null
+     */
+    protected function loadSwedbankPayOrder()
     {
         $orderId = $this->getRequest()->getParam('order_id');
 
-        return $this->orderRepository->getByOrderId($orderId);
+        try {
+            $swedbankPayOrder = $this->orderRepository->getByOrderId($orderId);
+        } catch (NoSuchEntityException $e) {
+            return null;
+        }
+
+        return $swedbankPayOrder;
     }
 }
