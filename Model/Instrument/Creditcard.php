@@ -193,10 +193,6 @@ class Creditcard extends AbstractInstrument
             $cardholder->setEmail($quote->getBillingAddress()->getEmail());
         }
 
-        if ($quoteAddress->getTelephone()) {
-            $cardholder->setMsisdn($quote->getBillingAddress()->getTelephone());
-        }
-
         $cardholder->setShippingAddress($this->createShippingAddressObject());
 
         return $cardholder;
@@ -224,10 +220,6 @@ class Creditcard extends AbstractInstrument
 
         if ($quoteAddress->getEmail()) {
             $shippingAddress->setEmail($quoteAddress->getEmail());
-        }
-
-        if ($quoteAddress->getTelephone()) {
-            $shippingAddress->setMsisdn($quoteAddress->getTelephone());
         }
 
         if ($quoteAddress->getStreetFull()) {
