@@ -2,11 +2,16 @@
 
 namespace SwedbankPay\Payments\Gateway\Command;
 
-use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Exception\AlreadyExistsException;
+use Magento\Framework\Exception\InputException;
 use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Payment\Gateway\Command;
 use Magento\Quote\Model\QuoteRepository as MageQuoteRepository;
 use Magento\Sales\Model\Order as MageOrder;
 use Magento\Sales\Model\OrderRepository as MageOrderRepository;
+use SwedbankPay\Api\Client\Exception;
+use SwedbankPay\Core\Exception\ServiceException;
+use SwedbankPay\Core\Exception\SwedbankPayException;
 use SwedbankPay\Core\Helper\Order as OrderHelper;
 use SwedbankPay\Core\Logger\Logger;
 use SwedbankPay\Core\Model\Service as ClientRequestService;
@@ -14,11 +19,9 @@ use SwedbankPay\Payments\Api\OrderRepositoryInterface as PaymentOrderRepository;
 use SwedbankPay\Payments\Api\QuoteRepositoryInterface as PaymentQuoteRepository;
 use SwedbankPay\Payments\Helper\PaymentData;
 use SwedbankPay\Payments\Helper\Service as ServiceHelper;
+use SwedbankPay\Payments\Helper\ServiceFactory;
 
 /**
- * Class Capture
- *
- * @package SwedbankPay\Payments\Gateway\Command
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class Capture extends AbstractCommand
@@ -29,9 +32,9 @@ class Capture extends AbstractCommand
     protected $paymentData;
 
     /**
-     * @var ServiceHelper
+     * @var ServiceFactory
      */
-    protected $serviceHelper;
+    protected $serviceFactory;
 
     /**
      * Capture constructor.
@@ -42,7 +45,7 @@ class Capture extends AbstractCommand
      * @param MageQuoteRepository $mageQuoteRepo
      * @param MageOrderRepository $mageOrderRepo
      * @param PaymentData $paymentData
-     * @param ServiceHelper $serviceHelper
+     * @param ServiceFactory $serviceFactory
      * @param Logger $logger
      * @param array $data
      */
@@ -53,7 +56,7 @@ class Capture extends AbstractCommand
         MageQuoteRepository $mageQuoteRepo,
         MageOrderRepository $mageOrderRepo,
         PaymentData $paymentData,
-        ServiceHelper $serviceHelper,
+        ServiceFactory $serviceFactory,
         Logger $logger,
         array $data = []
     ) {
@@ -68,7 +71,7 @@ class Capture extends AbstractCommand
         );
 
         $this->paymentData = $paymentData;
-        $this->serviceHelper = $serviceHelper;
+        $this->serviceFactory = $serviceFactory;
     }
 
     /**
@@ -76,11 +79,14 @@ class Capture extends AbstractCommand
      *
      * @param array $commandSubject
      *
-     * @return void
+     * @return Command\ResultInterface|null
+     *
+     * @throws AlreadyExistsException
+     * @throws Exception
+     * @throws InputException
      * @throws NoSuchEntityException
-     * @throws \SwedbankPay\Core\Exception\ServiceException
-     * @throws \SwedbankPay\Api\Client\Exception
-     * @throws LocalizedException
+     * @throws ServiceException
+     * @throws SwedbankPayException
      */
     public function execute(array $commandSubject)
     {
@@ -105,7 +111,9 @@ class Capture extends AbstractCommand
             return null;
         }
 
-        $captureResponse = $this->serviceHelper->capture($swedbankPayOrder->getInstrument(), $swedbankPayOrder, $order);
+        /** @var ServiceHelper $serviceHelper */
+        $serviceHelper = $this->serviceFactory->create();
+        $captureResponse = $serviceHelper->capture($swedbankPayOrder->getInstrument(), $swedbankPayOrder, $order);
 
         $this->checkResponseResource('capture', $captureResponse->getResponseResource(), $order, $swedbankPayOrder);
 

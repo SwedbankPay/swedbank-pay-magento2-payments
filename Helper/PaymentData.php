@@ -7,6 +7,7 @@ use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Phrase;
 use Magento\Quote\Model\Quote as MageQuote;
 use Magento\Sales\Api\Data\OrderInterface as MagentoOrderInterface;
+use Magento\Framework\Exception\LocalizedException;
 
 use SwedbankPay\Core\Logger\Logger;
 use SwedbankPay\Payments\Api\OrderRepositoryInterface as PaymentOrderRepository;
@@ -222,18 +223,20 @@ class PaymentData
      */
     public function updateRemainingAmounts($command, $amount, $order)
     {
+        $amountInSubUnit = (int) round($amount * 100);
+
         switch ($command) {
             case 'capture':
-                $order->setRemainingCapturingAmount($order->getRemainingCapturingAmount() - ($amount * 100));
+                $order->setRemainingCapturingAmount($order->getRemainingCapturingAmount() - $amountInSubUnit);
                 $order->setRemainingCancellationAmount($order->getRemainingCapturingAmount());
-                $order->setRemainingReversalAmount($order->getRemainingReversalAmount() + ($amount * 100));
+                $order->setRemainingReversalAmount($order->getRemainingReversalAmount() + $amountInSubUnit);
                 break;
             case 'cancel':
-                $order->setRemainingCancellationAmount($order->getRemainingCancellationAmount() - ($amount * 100));
+                $order->setRemainingCancellationAmount($order->getRemainingCancellationAmount() - $amountInSubUnit);
                 $order->setRemainingCapturingAmount($order->getRemainingCancellationAmount());
                 break;
             case 'refund':
-                $order->setRemainingReversalAmount($order->getRemainingReversalAmount() - ($amount * 100));
+                $order->setRemainingReversalAmount($order->getRemainingReversalAmount() - $amountInSubUnit);
                 break;
         }
 
@@ -243,6 +246,8 @@ class PaymentData
     /**
      * @param array $response
      * @param string $instrument
+     * @throws NoSuchEntityException
+     * @throws LocalizedException
      */
     public function saveQuoteToDB($response, $instrument)
     {

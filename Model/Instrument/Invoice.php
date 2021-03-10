@@ -34,8 +34,6 @@ use SwedbankPay\Payments\Api\Data\OrderInterface as SwedbankPayOrderInterface;
 use SwedbankPay\Payments\Helper\Factory\SubresourceFactory;
 
 /**
- * Class Invoice
- *
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class Invoice extends AbstractInstrument

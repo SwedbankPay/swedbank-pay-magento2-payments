@@ -19,18 +19,19 @@ use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Order as MagentoOrder;
 use SwedbankPay\Api\Response;
+use SwedbankPay\Api\Service\Payment\Resource\Response\Data\PaymentObjectInterface;
 use SwedbankPay\Api\Service\Payment\Transaction\Resource\Response\Data\TransactionInterface;
 use SwedbankPay\Core\Helper\Order as OrderHelper;
 use SwedbankPay\Core\Logger\Logger;
 use SwedbankPay\Payments\Api\Data\OrderInterface;
 use SwedbankPay\Payments\Api\Data\QuoteInterface;
 use SwedbankPay\Payments\Helper\Config as ConfigHelper;
+use SwedbankPay\Payments\Helper\PaymentData as PaymentDataHelper;
 use SwedbankPay\Payments\Helper\Service as ServiceHelper;
+use SwedbankPay\Payments\Helper\ServiceFactory;
 use SwedbankPay\Payments\Model\ResourceModel\OrderRepository;
 
 /**
- * Class Callback
- *
  * @SuppressWarnings(PHPMD.CyclomaticComplexity)
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
@@ -62,9 +63,14 @@ class Callback extends PaymentActionAbstract implements CsrfAwareActionInterface
     protected $orderRepository;
 
     /**
-     * @var ServiceHelper
+     * @var ServiceFactory
      */
-    protected $serviceHelper;
+    protected $serviceFactory;
+
+    /**
+     * @var PaymentDataHelper
+     */
+    protected $paymentDataHelper;
 
     /**
      * Callback constructor.
@@ -73,13 +79,13 @@ class Callback extends PaymentActionAbstract implements CsrfAwareActionInterface
      * @param EventManager $eventManager
      * @param ConfigHelper $configHelper
      * @param Logger $logger
-     * @param ServiceHelper $serviceHelper
+     * @param ServiceFactory $serviceFactory
+     * @param PaymentDataHelper $paymentDataHelper
      * @param RequestContentInterface $requestContent
      * @param JsonFactory $jsonResultFactory
      * @param OrderHelper $orderHelper
      * @param OrderRepositoryInterface $magentoOrderRepo
      * @param OrderRepository $orderRepository
-     * @SuppressWarnings(PHPMD.ExcessiveParameterList)
      */
     public function __construct(
         Context $context,
@@ -87,7 +93,8 @@ class Callback extends PaymentActionAbstract implements CsrfAwareActionInterface
         EventManager $eventManager,
         ConfigHelper $configHelper,
         Logger $logger,
-        ServiceHelper $serviceHelper,
+        ServiceFactory $serviceFactory,
+        PaymentDataHelper $paymentDataHelper,
         RequestContentInterface $requestContent,
         JsonFactory $jsonResultFactory,
         OrderHelper $orderHelper,
@@ -101,7 +108,8 @@ class Callback extends PaymentActionAbstract implements CsrfAwareActionInterface
         $this->requestContent = $requestContent;
         $this->magentoOrderRepo = $magentoOrderRepo;
         $this->orderRepository = $orderRepository;
-        $this->serviceHelper = $serviceHelper;
+        $this->serviceFactory = $serviceFactory;
+        $this->paymentDataHelper = $paymentDataHelper;
 
         $this->setEventName('callback');
         $this->setEventMethod([$this, 'updatePaymentData']);
@@ -137,31 +145,17 @@ class Callback extends PaymentActionAbstract implements CsrfAwareActionInterface
         $requestData = $response->toArray();
 
         $paymentId = $requestData['payment']['id'];
-        $transactionId = $requestData['transaction']['id'];
+        $transactionNumber = $requestData['transaction']['number'];
 
-        $paymentData = $this->serviceHelper->getPaymentData($paymentId);
-        $transactionData = $this->serviceHelper->getTransactionData($transactionId, $paymentId);
+        $paymentData = $this->paymentDataHelper->getByPaymentIdPath($paymentId);
 
-//        $paymentData = null;
-//        $transactionData = null;
-//
-//        foreach ($requestData as $requestKey => $requestValue) {
-//            switch ($requestKey) {
-//                case 'payment':
-//                    $paymentData = $this->serviceHelper->getPaymentData($requestValue['id']);
-//                    break;
-//                case 'transaction':
-//                    // Replaces specific transactions with generic 'transactions'
-////                    $transactionUri = preg_replace(
-////                        '|/psp/([^/]+)/payments/([^/]+)/([^/]+)/([^/]+)|',
-////                        '/psp/$1/payments/$2/transactions/$4',
-////                        $requestValue['id']
-////                    );
-//
-//                    $transactionData = $this->serviceHelper->getTransactionData($requestValue['id'], $paymentData);
-//                    break;
-//            }
-//        }
+        /** @var ServiceHelper $serviceHelper */
+        $serviceHelper = $this->serviceFactory->create();
+        $serviceHelper->currentPayment($paymentData->getInstrument(), $paymentId, ['transactions']);
+
+        $this->updateIntent($paymentData, $serviceHelper->getPaymentResponseResource());
+
+        $transactionData = $serviceHelper->getTransaction($transactionNumber);
 
         if (!($transactionData instanceof TransactionInterface)) {
             return $this->createResult(
@@ -205,6 +199,19 @@ class Callback extends PaymentActionAbstract implements CsrfAwareActionInterface
             'success',
             'Order was updated successfully'
         );
+    }
+
+    /**
+     * @param QuoteInterface|OrderInterface $paymentData
+     * @param PaymentObjectInterface $paymentResponseResource
+     */
+    public function updateIntent($paymentData, $paymentResponseResource)
+    {
+        $paymentData->setIntent($paymentResponseResource->getPayment()->getIntent());
+        $paymentData->setState($paymentResponseResource->getPayment()->getState());
+        $paymentData->setAmount($paymentResponseResource->getPayment()->getAmount());
+
+        $this->paymentDataHelper->update($paymentData);
     }
 
     /**

@@ -5,9 +5,6 @@ namespace SwedbankPay\Payments\Gateway\Config;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use SwedbankPay\Payments\Helper\Config as ConfigHelper;
 
-/**
- * Class Config
- */
 class Config extends \Magento\Payment\Gateway\Config\Config
 {
     /** @var ConfigHelper */

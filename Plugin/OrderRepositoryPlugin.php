@@ -75,7 +75,6 @@ class OrderRepositoryPlugin
      * @param MagentoOrderRepository $subject
      * @param OrderInterface $mageOrder
      * @return OrderInterface
-     * @throws NoSuchEntityException
      *
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      * @SuppressWarnings(PHPMD.EmptyCatchBlock)
@@ -89,7 +88,20 @@ class OrderRepositoryPlugin
             return $mageOrder;
         }
 
-        $swedbankPayQuote = $this->quoteRepository->getByQuoteId($mageOrder->getQuoteId());
+        $this->logger->debug('OrderRepositoryPlugin is called!');
+
+        try {
+            $swedbankPayQuote = $this->quoteRepository->getByQuoteId($mageOrder->getQuoteId());
+        } catch (NoSuchEntityException $e) {
+            $this->logger->debug(sprintf(
+                'No SwedbankPay Quote exists with Quote ID # %s',
+                $mageOrder->getQuoteId()
+            ));
+
+            $this->logger->debug('No SwedbankPay Order is created as the order is placed using another payment method');
+
+            return $mageOrder;
+        }
 
         try {
             if ($this->orderRepository->getByOrderId($mageOrder->getEntityId())) {

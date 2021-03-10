@@ -11,8 +11,6 @@ use SwedbankPay\Payments\Helper\Config;
 use SwedbankPay\Payments\Model\Instrument\Collector\InstrumentCollector;
 
 /**
- * Class AvailableInstruments
-
  * @SuppressWarnings(PHPMD.CamelCaseMethodName)
  * @SuppressWarnings(PHPMD.CamelCasePropertyName)
  */

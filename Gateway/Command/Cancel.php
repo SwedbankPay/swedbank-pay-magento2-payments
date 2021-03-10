@@ -2,6 +2,8 @@
 
 namespace SwedbankPay\Payments\Gateway\Command;
 
+use Magento\Framework\Exception\AlreadyExistsException;
+use Magento\Framework\Exception\InputException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Pricing\PriceCurrencyInterface;
 use Magento\Payment\Gateway\Command;
@@ -19,11 +21,9 @@ use SwedbankPay\Payments\Api\OrderRepositoryInterface as PaymentOrderRepository;
 use SwedbankPay\Payments\Api\QuoteRepositoryInterface as PaymentQuoteRepository;
 use SwedbankPay\Payments\Helper\PaymentData;
 use SwedbankPay\Payments\Helper\Service as ServiceHelper;
+use SwedbankPay\Payments\Helper\ServiceFactory;
 
 /**
- * Class Cancel
- *
- * @package SwedbankPay\Payments\Gateway\Command
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class Cancel extends AbstractCommand
@@ -34,9 +34,9 @@ class Cancel extends AbstractCommand
     protected $paymentData;
 
     /**
-     * @var ServiceHelper
+     * @var ServiceFactory
      */
-    protected $serviceHelper;
+    protected $serviceFactory;
 
     /**
      * Cancel constructor.
@@ -46,7 +46,7 @@ class Cancel extends AbstractCommand
      * @param ClientRequestService $requestService
      * @param MageQuoteRepository $mageQuoteRepo
      * @param MageOrderRepository $mageOrderRepo
-     * @param ServiceHelper $serviceHelper
+     * @param ServiceFactory $serviceFactory
      * @param PaymentData $paymentData
      * @param Logger $logger
      * @param array $data
@@ -57,7 +57,7 @@ class Cancel extends AbstractCommand
         ClientRequestService $requestService,
         MageQuoteRepository $mageQuoteRepo,
         MageOrderRepository $mageOrderRepo,
-        ServiceHelper $serviceHelper,
+        ServiceFactory $serviceFactory,
         PaymentData $paymentData,
         Logger $logger,
         array $data = []
@@ -73,7 +73,7 @@ class Cancel extends AbstractCommand
         );
 
         $this->paymentData = $paymentData;
-        $this->serviceHelper = $serviceHelper;
+        $this->serviceFactory = $serviceFactory;
     }
 
     /**
@@ -81,11 +81,14 @@ class Cancel extends AbstractCommand
      *
      * @param array $commandSubject
      *
-     * @return null|Command\ResultInterface
-     * @throws NoSuchEntityException
-     * @throws SwedbankPayException
-     * @throws ServiceException
+     * @return Command\ResultInterface|null
+     *
+     * @throws AlreadyExistsException
      * @throws Exception
+     * @throws InputException
+     * @throws NoSuchEntityException
+     * @throws ServiceException
+     * @throws SwedbankPayException
      */
     public function execute(array $commandSubject)
     {
@@ -110,7 +113,9 @@ class Cancel extends AbstractCommand
 
         $this->checkRemainingAmount('cancel', $amount, $order, $swedbankPayOrder);
 
-        $cancelResponse = $this->serviceHelper->cancel($swedbankPayOrder->getInstrument(), $swedbankPayOrder);
+        /** @var ServiceHelper $serviceHelper */
+        $serviceHelper = $this->serviceFactory->create();
+        $cancelResponse = $serviceHelper->cancel($swedbankPayOrder->getInstrument(), $swedbankPayOrder);
 
         $this->checkResponseResource('cancel', $cancelResponse->getResponseResource(), $order, $swedbankPayOrder);
 

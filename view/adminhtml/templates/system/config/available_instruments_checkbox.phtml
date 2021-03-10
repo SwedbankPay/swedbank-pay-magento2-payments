@@ -4,7 +4,7 @@
 
 <input type="hidden" name="<?= $block->escapeHtml($block->getNamePrefix()) ?>" value="" />
 <ul class="checkboxes">
-    <?php foreach ($block->getValues() as $name => $label) : ?>
+    <?php foreach ($block->getValues() as $name => $label): ?>
         <li>
             <input type="checkbox"
                    value="<?= $block->escapeHtml($name) ?>"

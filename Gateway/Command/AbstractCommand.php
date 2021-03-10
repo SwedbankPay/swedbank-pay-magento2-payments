@@ -13,20 +13,17 @@ use Magento\Sales\Api\Data\OrderInterface as MagentoOrderInterface;
 use Magento\Sales\Model\OrderRepository as MageOrderRepository;
 use SwedbankPay\Api\Service\Data\RequestInterface;
 use SwedbankPay\Api\Service\Resource\Data\ResponseInterface as ResponseResourceInterface;
-use SwedbankPay\Framework\AbstractDataTransferObject;
 use SwedbankPay\Core\Exception\ServiceException;
 use SwedbankPay\Core\Exception\SwedbankPayException;
 use SwedbankPay\Core\Logger\Logger;
 use SwedbankPay\Core\Model\Service as ClientRequestService;
+use SwedbankPay\Framework\AbstractDataTransferObject;
 use SwedbankPay\Payments\Api\Data\OrderInterface as PaymentOrderInterface;
 use SwedbankPay\Payments\Api\Data\QuoteInterface as PaymentQuoteInterface;
 use SwedbankPay\Payments\Api\OrderRepositoryInterface as PaymentOrderRepository;
 use SwedbankPay\Payments\Api\QuoteRepositoryInterface as PaymentQuoteRepository;
 
 /**
- * Class AbstractCommand
- *
- * @package SwedbankPay\Payments\Gateway\Command
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 abstract class AbstractCommand extends DataObject implements CommandInterface
@@ -264,7 +261,9 @@ abstract class AbstractCommand extends DataObject implements CommandInterface
         // phpcs:ignore Magento2.Functions.DiscouragedFunction
         $remainingAmount = (int)call_user_func([$swedbankPayOrder, $getMethod]);
 
-        if ($remainingAmount >= (int) round($amount * 100)) {
+        $amountInSubUnit = (int) round($amount * 100);
+
+        if ($remainingAmount >= $amountInSubUnit) {
             return;
         }
 
@@ -275,7 +274,7 @@ abstract class AbstractCommand extends DataObject implements CommandInterface
                 $command,
                 $mageOrder->getEntityId(),
                 $swedbankPayOrder->getPaymentId(),
-                $amount,
+                $amountInSubUnit,
                 $remainingAmount
             )
         );
@@ -285,7 +284,7 @@ abstract class AbstractCommand extends DataObject implements CommandInterface
                 sprintf(
                     "SwedbankPay %s Error: The amount of %s exceeds the remaining %s.",
                     ucfirst($command),
-                    $amount,
+                    $amountInSubUnit,
                     $remainingAmount
                 )
             )
