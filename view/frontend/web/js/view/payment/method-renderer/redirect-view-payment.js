@@ -56,6 +56,7 @@ define([
         },
         redirectUrl: redirectUrl,
         isRedirectUrlVisible: isRedirectUrlVisible,
+        redirectAfterPlaceOrder: false,
         paymentErrors: paymentErrors,
         logoUrl: function () {
             return require.toUrl(this.config.data.logo);
@@ -129,20 +130,16 @@ define([
         },
         onRedirectSelected: function(element, event) {
             let self = this;
-
             fullscreenLoader.startLoader();
-
-            self.redirectAfterPlaceOrder = false;
-
             if(!self.placeOrder()) {
                 fullscreenLoader.stopLoader();
-
                 console.error('Error occurred while placing the order');
-            } else {
-                fullscreenLoader.stopLoader();
-                customerData.invalidate(['cart']);
-                window.location.href = self.redirectUrl();
             }
+        },
+        afterPlaceOrder: function () {
+            fullscreenLoader.stopLoader();
+            customerData.invalidate(['cart']);
+            window.location.href = this.redirectUrl();
         },
         getPaymentErrors: function () {
             let self = this;
